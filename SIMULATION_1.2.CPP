@@ -165,8 +165,8 @@ signed main()
           {
             --cur;
             server_list[i]=0 ;
+            // Add customers from queue too.
           }
-          
         }
       }
       else
@@ -276,15 +276,15 @@ signed main()
           else if (server_list[i]==2) disconnected_filled.pb(i) ;
         }
 
-        int Q = current_queue.size() ;
+        int Q = n - disconnected_filled.size()-connected.size();
 
         if(Q>0)
         {
           server_list[k]=1 ;
           td[k]=t+Y() ;
           cout<<"Hello";
-          cout<<"Customer " <<current_queue.front() <<" entering service"<<endl;
-          S[current_queue.front()]=t;
+          cout << "Customer " << current_customer[k] << " entering service" << endl;
+          S[current_customer[k]] = t;
         }
         else
         {
@@ -297,7 +297,10 @@ signed main()
   }
   For(i,D.size()){
     data <<i <<"," << A[i][0] << "," << A[i][1] <<"," <<A[i][2] <<"," <<S[i] <<","<<"\n" ;
+    if (i == D.size())
+      break;
   }
+  data<<';';
   data.close();
   cout << endl ;
 	return 0;
