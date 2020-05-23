@@ -164,23 +164,52 @@ signed main()
           if(server_list[i]==-1)
           {
             --cur;
-            server_list[i]=0 ;
+            if(!current_queue.empty()){
+              current_customer[i]=current_queue.front() ;
+              current_queue.pop() ;
+              server_list[i]=1 ;
+            }
+            else{
+              current_customer[i]=-1 ;
+              server_list[i]=0 ;
+              
+            }
+            
             // Add customers from queue too.
           }
         }
       }
       else
       {
-        for(int &x :server_list)
-          if(x==-1)
-            x=0 ;
+        // for(int &x :server_list)
+        //   if(x==-1)
+        //     x=0 ;
+        for(int i=0;i<mxN;i++){
+          if(server_list[i]==-1){
+            if(!current_queue.empty()){
+              current_customer[i]=current_queue.front() ;
+              current_queue.pop() ;
+              server_list[i]=1 ;
+            }
+            else{
+              current_customer[i]=-1 ;
+              server_list[i]=0 ;
+            }
+          }
+        }
         int curr = C(t)-c- count_disconnected ;
         for(int i=0;curr;i++)
         {
           if(server_list[i]==2)
           {
             --curr ;
-            server_list[i]=0 ;
+            // server_list[i]= ;
+            if(!current_queue.empty()){
+              server_list[i]=1 ;
+            }
+            else{
+              server_list[i]=0 ;
+            }
           }
         }
       }
