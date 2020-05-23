@@ -1,4 +1,4 @@
-Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time
+Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,
 0,16.3648,1,0,1,0,16.3648,27.6889,0,
 1,40.0875,1,0,4,0,40.0875,58.2292,0,
 2,61.9544,1,0,6,0,61.9544,104.087,0,
