@@ -158,16 +158,15 @@ signed main()
         }
       }
       if(count_disconnected>=C(t)-c)
-      {
-        for(int i=0 ;count_disconnected>0;i++)
+      { int cur = C(t)-c ;
+        for(int i=0 ;cur>0;i++)
         {
           if(server_list[i]==-1)
           {
-            --count_disconnected;
+            --cur;
             server_list[i]=0 ;
           }
-          if (count_disconnected == 0)
-            break;
+          
         }
       }
       else
