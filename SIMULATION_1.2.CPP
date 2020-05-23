@@ -50,7 +50,7 @@ float lambda(float t)
 float Y()
 {
   float U = random ;
-  return -log(U)/0.1 ;
+  return -log(U)/0.05 ;
 }
 
 float Ts_generator(float s)
@@ -114,10 +114,10 @@ signed main()
   // CSV output File
   std::ofstream data;
   data.open ("data.csv");
-  data<<"Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Time of start of service,\n";
+  data << "Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time\n";
 
   int b = 0;
-  while(b<50)
+  while(b<5000)
   {
     cout<<"----System Status----" <<endl;
     cout<<"Present time:"<<t <<endl;
@@ -145,8 +145,8 @@ signed main()
     }
 
     t=min(tk,ta) ;
-
-    if(C(t)>c)
+    float c_ = C( (t - int(t)) + int(t) % 1440 ) ;
+     if (c_ > c)
     // Server Adding
     {
       int count_disconnected=0 ;
@@ -157,25 +157,29 @@ signed main()
           count_disconnected++;
         }
       }
-      if(count_disconnected>=C(t)-c)
-      { int cur = C(t)-c ;
+      if(count_disconnected>= c_-c)
+      {
+        int cur = c_ - c;
         for(int i=0 ;cur>0;i++)
         {
           if(server_list[i]==-1)
           {
             --cur;
-            if(!current_queue.empty()){
+            if(!current_queue.empty())
+            {
               current_customer[i]=current_queue.front() ;
+              cout << "Customer " << current_queue.front() << " entering service" << endl;
+              S[current_queue.front()]=t;
               current_queue.pop() ;
               server_list[i]=1 ;
+              td[i] = t +Y();
             }
-            else{
+            else
+            {
               current_customer[i]=-1 ;
               server_list[i]=0 ;
               
             }
-            
-            // Add customers from queue too.
           }
         }
       }
@@ -188,8 +192,11 @@ signed main()
           if(server_list[i]==-1){
             if(!current_queue.empty()){
               current_customer[i]=current_queue.front() ;
+              cout << "Customer " << current_queue.front() << " entering service" << endl;
+              S[current_queue.front()] = t;
               current_queue.pop() ;
               server_list[i]=1 ;
+              td[i] = t + Y();
             }
             else{
               current_customer[i]=-1 ;
@@ -197,24 +204,26 @@ signed main()
             }
           }
         }
-        int curr = C(t)-c- count_disconnected ;
+        int curr = c_-c- count_disconnected ;
         for(int i=0;curr;i++)
         {
           if(server_list[i]==2)
           {
             --curr ;
             // server_list[i]= ;
-            if(!current_queue.empty()){
+            if(!current_queue.empty())
+            {
               server_list[i]=1 ;
             }
-            else{
+            else
+            {
               server_list[i]=0 ;
             }
           }
         }
       }
     }
-    if(C(t)<c)
+    if(c_<c)
     // Server removal
     {
       vector<int> connected_servers,connected_empty;
@@ -225,9 +234,9 @@ signed main()
         if(server_list[i]==0)
           connected_empty.pb(i) ;
       }
-      if(connected_servers.size()>=c-C(t))
+      if(connected_servers.size()>=c-c_)
       {
-        int servers_to_close  =c-C(t) ;
+        int servers_to_close  =c-c_ ;
         for(int &x: connected_servers)
         {
           if(servers_to_close)
@@ -243,7 +252,7 @@ signed main()
       {
         for(int &x :connected_servers)
           server_list[x]=2 ;
-        int cur = c-C(t)-(int)connected_servers.size() ;
+        int cur = c-c_-(int)connected_servers.size() ;
         for(int &x : connected_empty)
           if(cur)
           {
@@ -253,17 +262,21 @@ signed main()
       }
     }
 
-    c=C(t) ;
+    c=c_ ;
 
     if(min(tk,ta)==ta)
     {
       cout<<"---Arrival happening of " <<customer_number <<" ---"<<endl;
-      ++n ;++Na ;ta = Ts_generator(t) ;
+      ++n ;++Na ;
+      ta = Ts_generator( (t - int(t)) + int(t) % 1440 );
       vector<int> empty_servers ;
+
       for(int i=0;i<mxN;i++)
         if(server_list[i]==0)
           empty_servers.pb(i) ;
-      if(empty_servers.size()){
+
+      if(empty_servers.size())
+      {
         server_list[empty_servers[0]]=1 ;
         td[empty_servers[0]]=t+Y() ;
         current_customer[empty_servers[0]]=customer_number ;
@@ -282,15 +295,18 @@ signed main()
       cout<<"---Departure happening at server : " <<k <<"---"<<endl;
       --n ;cumulative_departures[k]++ ;
       D[current_customer[k]]=t ;
-      if(!current_queue.empty()){
+      if(!current_queue.empty())
+      {
         assert(current_queue.front()>=0) ;
         current_customer[k]=current_queue.front() ;
         current_queue.pop() ;
-
-      }else
+      }
+      else
         current_customer[k]=-1 ;
+
       tk=INF ;
-      if(server_list[k]==2){
+      if(server_list[k]==2)
+      {
         server_list[k]=-1;
         td[k]=INF ;
       }
@@ -310,8 +326,7 @@ signed main()
         if(Q>0)
         {
           server_list[k]=1 ;
-          td[k]=t+Y() ;
-          cout<<"Hello";
+          td[k]=t+Y() ;          
           cout << "Customer " << current_customer[k] << " entering service" << endl;
           S[current_customer[k]] = t;
         }
@@ -325,7 +340,7 @@ signed main()
     b++;
   }
   For(i,D.size()){
-    data <<i <<"," << A[i][0] << "," << A[i][1] <<"," <<A[i][2] <<"," <<S[i] <<","<<"\n" ;
+    data <<i <<"," << A[i][0] << "," << A[i][1] <<"," <<A[i][2] <<"," <<((int(A[i][0]))%1440)/10 <<',' <<int(A[i][0]/1440) <<',' <<S[i] <<"," <<D[i] <<"," <<(S[i]-A[i][0]) <<"," <<"\n" ;
     if (i == D.size())
       break;
   }
