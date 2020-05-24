@@ -158,6 +158,24 @@ signed main()
       logger << x << ',';
     logger << ']' << endl;
 
+    cout << "Queue list: [";
+    logger << "Queue list: [";
+    vector<int> v;
+    while (!current_queue.empty())
+    {
+      int x = current_queue.front();
+      v.push_back(x);
+      current_queue.pop();
+    }
+    for (auto &x : v)
+    {
+      cout << x << ',';
+      logger <<x <<',';
+      current_queue.push(x);
+    }
+    logger<<']' <<endl;
+    cout << "\b]" << endl;
+
     float tk= INF  ;
     int k =-1 ;
     for(int i=0;i<mxN;i++)
@@ -322,7 +340,7 @@ signed main()
       logger << "---Departure happening at server : " << k << "---" << endl;
       --n ;cumulative_departures[k]++ ;
       D[current_customer[k]]=t ;
-      if(!current_queue.empty())
+      if(!current_queue.empty() && server_list[k]!=2)
       {
         assert(current_queue.front()>=0) ;
         current_customer[k]=current_queue.front() ;
@@ -370,10 +388,11 @@ signed main()
   For(i,D.size()){
     data <<i <<"," << A[i][0] << "," << A[i][1] <<"," <<A[i][2] <<"," <<((int(A[i][0]))%1440)/10 <<',' <<int(A[i][0]/1440) <<',' <<S[i] <<"," <<D[i] <<"," <<(S[i]-A[i][0]) <<"," <<"\n" ;
     if (i == D.size())
+    {
+      data.close();
       break;
+    }
   }
-  data<<';';
-  data.close();
   logger.close();
   cout << endl ;
 	return 0;
