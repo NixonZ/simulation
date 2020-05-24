@@ -50,18 +50,21 @@ float lambda(float t)
 float Y()
 {
   float U = random ;
-  return -log(U)/0.1 ;
+  if ( U!=0 && U<0.85)
+    return -log(U)/0.05 ;
+  else
+    return Y();
 }
 
 float Ts_generator(float s)
 {
-  float t =s  ;
+  float t = s ;
   while(1)
   {
     float U= random ;
     t-=log(U)/L ;
     U =random ;
-    if(U<=lambda(t)/L)
+    if (U <= lambda( (t - int(t)) + int(t) % 1440 ) / L)
       return t ;
   }
 }
@@ -291,7 +294,7 @@ signed main()
       cout<<"---Arrival happening of " <<customer_number <<" ---"<<endl;
       logger << "---Arrival happening of " << customer_number << " ---" << endl;
       ++n ;++Na ;
-      ta = Ts_generator( (t - int(t)) + int(t) % 1440 );
+      ta = Ts_generator(t);
       vector<int> empty_servers ;
 
       for(int i=0;i<mxN;i++)
