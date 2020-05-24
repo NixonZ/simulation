@@ -50,7 +50,7 @@ float lambda(float t)
 float Y()
 {
   float U = random ;
-  return -log(U)/0.05 ;
+  return -log(U)/0.1 ;
 }
 
 float Ts_generator(float s)
@@ -112,9 +112,11 @@ signed main()
     server_list[j]=0 ;
 
   // CSV output File
-  std::ofstream data;
-  data.open ("data.csv");
-  data << "Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time\n";
+  std::ofstream data,logger;
+  data.open("data.csv", std::ofstream::out);
+  data << "Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,\n";
+
+  logger.open("log.txt",std::ofstream::out);
 
   int b = 0;
   while(b<5000)
@@ -125,14 +127,34 @@ signed main()
     cout<<"Cummulative Number of Arrivals by t:" <<Na <<endl;
     cout<<"Time for next arrival:" <<ta <<endl;
     cout<<"Number of Servers:" << c <<endl;
+
+    logger<<"------System Status------" <<endl;
+    logger<<"Present time:"<<t <<endl;
+    logger << "Number of People Present:" << n << endl;
+    logger << "Cummulative Number of Arrivals by t:" << Na << endl;
+    logger << "Time for next arrival:" << ta << endl;
+    logger << "Number of Servers:" << c << endl;
+
     cout<<"Server List:" <<"[";
     for(int &x :server_list)
       cout<<x <<',';
     cout<<"\b]"<<endl;
+
+    logger << "Server List:" << "[";
+    for (int &x : server_list)
+      logger << x << ',';
+    logger <<']' <<endl;
+
     cout<<"Departure times:" <<"[";
     for(float &x :td)
       cout<<x <<',';
     cout<<"\b]"<<endl;
+
+    logger << "Departure times:" << "[";
+    for (float &x : td)
+      logger << x << ',';
+    logger << ']' << endl;
+
     float tk= INF  ;
     int k =-1 ;
     for(int i=0;i<mxN;i++)
@@ -267,6 +289,7 @@ signed main()
     if(min(tk,ta)==ta)
     {
       cout<<"---Arrival happening of " <<customer_number <<" ---"<<endl;
+      logger << "---Arrival happening of " << customer_number << " ---" << endl;
       ++n ;++Na ;
       ta = Ts_generator( (t - int(t)) + int(t) % 1440 );
       vector<int> empty_servers ;
@@ -293,6 +316,7 @@ signed main()
     else if(min(tk,ta)==tk)
     {
       cout<<"---Departure happening at server : " <<k <<"---"<<endl;
+      logger << "---Departure happening at server : " << k << "---" << endl;
       --n ;cumulative_departures[k]++ ;
       D[current_customer[k]]=t ;
       if(!current_queue.empty())
@@ -328,6 +352,7 @@ signed main()
           server_list[k]=1 ;
           td[k]=t+Y() ;          
           cout << "Customer " << current_customer[k] << " entering service" << endl;
+          logger << "Customer " << current_customer[k] << " entering service" << endl;
           S[current_customer[k]] = t;
         }
         else
@@ -346,6 +371,7 @@ signed main()
   }
   data<<';';
   data.close();
+  logger.close();
   cout << endl ;
 	return 0;
 }
