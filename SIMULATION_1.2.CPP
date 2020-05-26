@@ -65,11 +65,11 @@ float Normals(float mu,float sigma)
 float DepartureTimes(float t)
 {
   if (t < 300.00)
-    return Normals()
+    return Normals(10,5);
   else if (t < 300 + 5 * 60)
-    return (0.3 + (1.0 / (5.0 * 60.0)) * (t - 300.00)) / 10.00;
+    return Normals(30,10);
   else
-    return (1.3 - (1.0 / (14.0 * 60.0)) * (t - 600)) / 10.00;
+    return Normals(20,5);
 }
 
 float Y()
@@ -241,7 +241,7 @@ signed main()
               S[current_queue.front()]=t;
               current_queue.pop() ;
               server_list[i]=1 ;
-              td[i] = t + Normals(20,10);
+              td[i] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
             }
             else
             {
@@ -266,7 +266,7 @@ signed main()
               S[current_queue.front()] = t;
               current_queue.pop() ;
               server_list[i]=1 ;
-              td[i] = t + Normals(20,10);
+              td[i] = t + DepartureTimes( (t - int(t)) + int(t) % 1440 );
             }
             else{
               current_customer[i]=-1 ;
@@ -349,7 +349,7 @@ signed main()
       if(empty_servers.size())
       {
         server_list[empty_servers[0]]=1 ;
-        td[empty_servers[0]]=t+Normals(20,10) ;
+        td[empty_servers[0]] = t + DepartureTimes( (t - int(t)) + int(t) % 1440 );
         current_customer[empty_servers[0]]=customer_number ;
         S[customer_number]=t;
       }
@@ -398,7 +398,7 @@ signed main()
         if(Q>0)
         {
           server_list[k]=1 ;
-          td[k]=t+Normals(20,10);          
+          td[k] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
           cout << "Customer " << current_customer[k] << " entering service" << endl;
           logger << "Customer " << current_customer[k] << " entering service" << endl;
           S[current_customer[k]] = t;
