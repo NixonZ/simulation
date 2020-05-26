@@ -137,14 +137,14 @@ signed main()
   vector<int>current_customer(mxN,-1) ;
   queue<int> current_queue ;
   int customer_number=15 ;
-  int Na =0,n=15,c=C(t);
+  int Na =15,n=15,c=C(t);
   for(int j=0;j<c;j++){
     server_list[j]=1 ;
     td[j]=DepartureTimes(0) ;
     current_customer[j]=j ;
   }
   for(int i=c;i<15;i++){
-      current_queue.push(c) ;
+      current_queue.push(i) ;
  
   }
 
