@@ -47,6 +47,31 @@ float lambda(float t)
     return (1.3-(1.0/(14.0*60.0))*(t-600))/10.00 ;
 }
 
+float Normals(float mu,float sigma)
+{
+  float U1 = random ;
+  float U2 = random;
+  float V1 = 2*U1 - 1; 
+  float V2 = 2*U2 - 1;
+  float S = V1*V1 + V2*V2;
+  if(S>1)
+    return Normals(mu,sigma);
+  pair<float,float> Normals;
+  Normals.first = (sqrt(-2.0*log(S)/S)*V1)*sigma + mu;
+  Normals.second = (sqrt(-2.0 * log(S) / S) * V1) * sigma + mu;
+  return min(Normals.first,Normals.second);
+}
+
+float DepartureTimes(float t)
+{
+  if (t < 300.00)
+    return Normals()
+  else if (t < 300 + 5 * 60)
+    return (0.3 + (1.0 / (5.0 * 60.0)) * (t - 300.00)) / 10.00;
+  else
+    return (1.3 - (1.0 / (14.0 * 60.0)) * (t - 600)) / 10.00;
+}
+
 float Y()
 {
   float U = random ;
@@ -212,10 +237,11 @@ signed main()
             {
               current_customer[i]=current_queue.front() ;
               cout << "Customer " << current_queue.front() << " entering service" << endl;
+              logger << "Customer " << current_queue.front() << " entering service" << endl;
               S[current_queue.front()]=t;
               current_queue.pop() ;
               server_list[i]=1 ;
-              td[i] = t +Y();
+              td[i] = t + Normals(20,10);
             }
             else
             {
@@ -236,10 +262,11 @@ signed main()
             if(!current_queue.empty()){
               current_customer[i]=current_queue.front() ;
               cout << "Customer " << current_queue.front() << " entering service" << endl;
+              logger << "Customer " << current_queue.front() << " entering service" << endl;
               S[current_queue.front()] = t;
               current_queue.pop() ;
               server_list[i]=1 ;
-              td[i] = t + Y();
+              td[i] = t + Normals(20,10);
             }
             else{
               current_customer[i]=-1 ;
@@ -322,7 +349,7 @@ signed main()
       if(empty_servers.size())
       {
         server_list[empty_servers[0]]=1 ;
-        td[empty_servers[0]]=t+Y() ;
+        td[empty_servers[0]]=t+Normals(20,10) ;
         current_customer[empty_servers[0]]=customer_number ;
         S[customer_number]=t;
       }
@@ -371,7 +398,7 @@ signed main()
         if(Q>0)
         {
           server_list[k]=1 ;
-          td[k]=t+Y() ;          
+          td[k]=t+Normals(20,10);          
           cout << "Customer " << current_customer[k] << " entering service" << endl;
           logger << "Customer " << current_customer[k] << " entering service" << endl;
           S[current_customer[k]] = t;
