@@ -60,16 +60,18 @@ float Normals(float mu,float sigma)
   Normals.first = (sqrt(-2.0*log(S)/S)*V1)*sigma + mu;
   Normals.second = (sqrt(-2.0 * log(S) / S) * V1) * sigma + mu;
   return min(Normals.first,Normals.second);
+  // float U = random;
+  // return -log((1.0/U)-1)/1.702;
 }
 
 float DepartureTimes(float t)
 {
   if (t < 300.00)
-    return Normals(10,5);
-  else if (t < 300 + 5 * 60)
     return Normals(30,10);
+  else if (t < 300 + 5 * 60)
+    return Normals(10,2);
   else
-    return Normals(20,5);
+    return Normals(30,10);
 }
 
 float Y()
@@ -147,7 +149,7 @@ signed main()
   logger.open("log.txt",std::ofstream::out);
 
   int b = 0;
-  while(b<5000)
+  while(b<10000)
   {
     cout<<"----System Status----" <<endl;
     cout<<"Present time:"<<t <<endl;
@@ -412,6 +414,7 @@ signed main()
     }
     b++;
   }
+  cout<<"Writing CSV" <<endl;
   For(i,D.size()){
     data <<i <<"," << A[i][0] << "," << A[i][1] <<"," <<A[i][2] <<"," <<((int(A[i][0]))%1440)/10 <<',' <<int(A[i][0]/1440) <<',' <<S[i] <<"," <<D[i] <<"," <<(S[i]-A[i][0]) <<"," <<"\n" ;
     if (i == D.size())
