@@ -49,19 +49,19 @@ float lambda(float t)
 
 float Normals(float mu,float sigma)
 {
-  float U1 = random ;
-  float U2 = random;
-  float V1 = 2*U1 - 1; 
-  float V2 = 2*U2 - 1;
-  float S = V1*V1 + V2*V2;
-  if(S>1)
-    return Normals(mu,sigma);
-  pair<float,float> Normals;
-  Normals.first = (sqrt(-2.0*log(S)/S)*V1)*sigma + mu;
-  Normals.second = (sqrt(-2.0 * log(S) / S) * V1) * sigma + mu;
-  return min(Normals.first,Normals.second);
-  // float U = random;
-  // return -log((1.0/U)-1)/1.702;
+  // float U1 = random ;
+  // float U2 = random;
+  // float V1 = 2*U1 - 1; 
+  // float V2 = 2*U2 - 1;
+  // float S = V1*V1 + V2*V2;
+  // if(S>1)
+  //   return Normals(mu,sigma);
+  // pair<float,float> Normals;
+  // Normals.first = (sqrt(-2.0*log(S)/S)*V1)*sigma + mu;
+  // Normals.second = (sqrt(-2.0 * log(S) / S) * V1) * sigma + mu;
+  // return min(Normals.first,Normals.second);
+  float U = random;
+  return (-log((1.0/U)-1)/1.702)*sigma+mu;
 }
 
 float DepartureTimes(float t)
@@ -96,7 +96,7 @@ float Ts_generator(float s)
   }
 }
 
-int C(int t)
+int C(float t)
 {
     if (t<10)
       return 3;
@@ -384,8 +384,7 @@ signed main()
       }
       else
         current_customer[k]=-1 ;
-
-      tk=INF ;
+      td[k] = INF;
       if(server_list[k]==2)
       {
         server_list[k]=-1;
@@ -424,7 +423,7 @@ signed main()
   cout<<"Writing CSV" <<endl;
   For(i,D.size()){
     data <<i <<"," << A[i][0] << "," << A[i][1] <<"," <<A[i][2] <<"," <<((int(A[i][0]))%1440)/10 <<',' <<int(A[i][0]/1440) <<',' <<S[i] <<"," <<D[i] <<"," <<(S[i]-A[i][0]) <<"," <<"\n" ;
-    if (i == D.size())
+    if (i == Na)
     {
       data.close();
       break;
