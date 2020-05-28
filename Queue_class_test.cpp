@@ -1,7 +1,7 @@
 #include "./station.h"
-#define T(t) (t - int(t)) + int(t) % 1440
+#include <bits/stdc++.h> 
 #define random (float)rand() / RAND_MAX;
-
+#define T(t) (t - int(t)) + int(t) % 1440
 float Normals(float mu, float sigma)
 {
     // float U1 = random ;
@@ -72,28 +72,122 @@ float Ts_generator(float s)
             return t;
     }
 }
+void simulate_stations(std::vector<station> system){
+
+	std::vector<float>min_departure_time(system.size()) ;
+	int station_index = 0;
+    float least_dep_time = system[0].find_min_td() ;
+	for(int i=0;i<system.size();i++)
+    {
+		min_departure_time[i]= system[i].find_min_td() ;
+		if(least_dep_time>min_departure_time[i])
+        {
+			least_dep_time = min_departure_time[i] ;
+			station_index =i ;
+		}
+	}
+	int server_index = system[station_index].find_min_k() ;
+    int discrete_events = 0;
+    float t = 0;
+    float ta = Ts_generator(T(t));
+    int l=0;
+    for (auto &x : system)
+    {
+        std::cout << "#### Station No." << l++ << "####" << endl;
+        x.print_station_status(T(t));
+    }
+    while(discrete_events<10)
+    {
+        l=0;
+        least_dep_time = system[0].find_min_td();
+        station_index = 0;
+        for (int i = 0; i < system.size(); i++)
+        {
+            min_departure_time[i] = system[i].find_min_td();
+            if (least_dep_time > min_departure_time[i])
+            {
+                least_dep_time = min_departure_time[i];
+                station_index = i;
+            }
+        }
+        std::cout << "Least dep time :" <<least_dep_time <<",Station_index : "<<station_index<<endl;
+        t = std::min(least_dep_time, ta);
+        for(auto &x: system)
+        {
+            x.server_updates(T(t));
+        }
+        int l=0;
+        if(t == ta)
+        {
+            std::cout << "---------------------------------> Arrival at Station 0" << endl;
+            // update first station for arrival (index =0 station)
+            system[0].add_customer_to_station( T(t) );
+            ta = Ts_generator(T(t));
+            std::cout << "Next arrival time :" << ta << endl;
+        }
+        else
+        {
+            if(station_index == system.size()-1)
+            {
+                std::cout << "---------------------------------> Departure at last station" << endl;
+                system[station_index].departure_updates(T(t)) ;
+                // do only departure updates for last station
+            }
+            else
+            {
+                std::cout << "---------------------------------> Departure at station :" <<station_index << endl;
+                system[station_index].departure_updates(T(t));
+                system[station_index+1].add_customer_to_station(T(t)) ;
+                // do departure updates for station_index 
+                // do arrival updates for station_index+1 
+            }
+        }
+        for (auto &x : system)
+        {
+            std::cout << "#### Station No." << l++ << "####" << endl;
+            x.print_station_status(T(t));
+        }
+        discrete_events++;
+    }
+}
 
 int main()
 {
     srand((unsigned)time(NULL));
-    station temp(5,C,DepartureTimes,0,0);
-    temp.print_station_status(0);
-    int discrete_events = 0;
-    float t = 0;
-    float ta = Ts_generator(T(t));
-    while (discrete_events<10)
-    {
-        t = std::min(temp.find_min_td(), ta);
-        temp.server_updates( T(t) );
-        if (t == ta)
-        {
-            //arrival happening
-            temp.add_customer_to_station( T(t) );
-            ta = Ts_generator( T(t) );
-        }
-        else
-            temp.departure_updates( T(t) );
-        temp.print_station_status( T(t) );
-        discrete_events++;
-    }
+    std:: vector<station>station_list ;
+    // for(int i=0;i<2;i++)
+    station_list.push_back( station( 2, [](float t)->int { return 2; } , [](float t)->float { return Normals(30,10); } ) );
+    station_list.push_back( station( 5, C , [](float t) -> float { return Normals(30, 10); } ) );
+    station_list.push_back( station( 4, [](float t) -> int { return 4; } , DepartureTimes  ) );
+    simulate_stations(station_list) ;
+    // int l=0;
+    // int t =0;
+    // for (auto &x : station_list)
+    //     {
+    //         std::cout <<"#### Station No." <<l++  <<"####" <<endl ;
+    //         x.print_station_status(T(t));
+    //     }
+    return 0 ;
+    // Simulation for Single server 
+    // station temp(5, [](float t)->int { return 5; } , [](float t)->float { return Normals(30,10); } );
+    // station temp(5,C,DepartureTimes,0,0);
+    // temp.print_station_status(0);
+    // int discrete_events = 0;
+    // float t = 0;
+    // float ta = Ts_generator(T(t));
+    // while (discrete_events<10)
+    // {
+    //     t = std::min(temp.find_min_td(), ta);
+    //     temp.server_updates( T(t) );
+    //     if (t == ta)
+    //     {
+    //         //arrival happening
+    //         temp.add_customer_to_station( T(t) );
+    //         ta = Ts_generator( T(t) );
+    //     }
+    //     else
+    //         temp.departure_updates( T(t) );
+    //     temp.print_station_status( T(t) );
+    //     discrete_events++;
+    // }
 }
