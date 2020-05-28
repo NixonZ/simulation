@@ -48,6 +48,94 @@ public:
             current_queue.push(i);
         }
     }
+
+    station(long init_mxN, C_type C_para, float init_dept, float t = 0, int init_n = 0)
+        : C(C_para), 
+          DepartureTimes( [init_dept](float t) -> float { return init_dept; })
+    {
+        mxN = init_mxN;
+
+        server_status.assign(mxN, -1);
+        current_customer.assign(mxN, -1);
+        td.assign(mxN, INF);
+        A.assign(INF, {0, 0, 0});
+        D.assign(INF, 0);
+        S.assign(INF, 0);
+        n = init_n;
+        c = 0;
+        this->server_updates((t - int(t)) + int(t) % 1440);
+        Na = n;
+        // Initialising n customers
+        for (int j = 0; j < std::min(n, c); j++)
+        {
+            server_status[j] = 1;
+            td[j] = DepartureTimes(0);
+            current_customer[j] = j;
+        }
+        for (int i = std::min(n, c); i < n; i++)
+        {
+            current_queue.push(i);
+        }
+    }
+
+    station(long init_mxN, int init_C, float init_dept, float t = 0, int init_n = 0)
+        : C( [init_C](float t) -> int { return init_C; }),
+          DepartureTimes( [init_dept](float t) -> float { return init_dept; } )
+    {
+        mxN = init_mxN;
+
+        server_status.assign(mxN, -1);
+        current_customer.assign(mxN, -1);
+        td.assign(mxN, INF);
+        A.assign(INF, {0, 0, 0});
+        D.assign(INF, 0);
+        S.assign(INF, 0);
+        n = init_n;
+        c = 0;
+        this->server_updates((t - int(t)) + int(t) % 1440);
+        Na = n;
+        // Initialising n customers
+        for (int j = 0; j < std::min(n, c); j++)
+        {
+            server_status[j] = 1;
+            td[j] = DepartureTimes(0);
+            current_customer[j] = j;
+        }
+        for (int i = std::min(n, c); i < n; i++)
+        {
+            current_queue.push(i);
+        }
+    }
+
+    station(long init_mxN, int init_C, event_type init_dept, float t = 0, int init_n = 0)   
+        : C( [init_C](float t) -> int { return init_C; } ),
+          DepartureTimes( init_dept )
+    {
+        mxN = init_mxN;
+
+        server_status.assign(mxN, -1);
+        current_customer.assign(mxN, -1);
+        td.assign(mxN, INF);
+        A.assign(INF, {0, 0, 0});
+        D.assign(INF, 0);
+        S.assign(INF, 0);
+        n = init_n;
+        c = 0;
+        this->server_updates((t - int(t)) + int(t) % 1440);
+        Na = n;
+        // Initialising n customers
+        for (int j = 0; j < std::min(n, c); j++)
+        {
+            server_status[j] = 1;
+            td[j] = DepartureTimes(0);
+            current_customer[j] = j;
+        }
+        for (int i = std::min(n, c); i < n; i++)
+        {
+            current_queue.push(i);
+        }
+    }
+
     void print_station_status(float t);
     int find_min_k()
     {

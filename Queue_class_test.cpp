@@ -154,22 +154,18 @@ void simulate_stations(std::vector<station> system){
 int main()
 {
     srand((unsigned)time(NULL));
+
     std:: vector<station>station_list ;
-    // for(int i=0;i<2;i++)
-    station_list.push_back( station( 2, [](float t)->int { return 2; } , [](float t)->float { return Normals(30,10); } ) );
+    station_list.push_back( station(2,2,10) );
     station_list.push_back( station( 5, C , [](float t) -> float { return Normals(30, 10); } ) );
-    station_list.push_back( station( 4, [](float t) -> int { return 4; } , DepartureTimes  ) );
+    station_list.push_back( station( 4, 4 , DepartureTimes  ) );
+
     simulate_stations(station_list) ;
-    // int l=0;
-    // int t =0;
-    // for (auto &x : station_list)
-    //     {
-    //         std::cout <<"#### Station No." <<l++  <<"####" <<endl ;
-    //         x.print_station_status(T(t));
-    //     }
+
     return 0 ;
+
     // Simulation for Single server 
-    // station temp(5, [](float t)->int { return 5; } , [](float t)->float { return Normals(30,10); } );
+    // station temp(5, [](float t)->int { return 5; } , [](float t)->float { return Normals(30,10); } ); //or
     // station temp(5,C,DepartureTimes,0,0);
     // temp.print_station_status(0);
     // int discrete_events = 0;
