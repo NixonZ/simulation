@@ -4,7 +4,8 @@ This repo is based on the paper [Accurate ED Wait Time Prediction by Erjie Ang e
 Further, we are also going to change the linear model to incorporate other ML techniques and hopefully create a better predictor.    
 
 `Simulation`    
-We follow a object oriented approach for creating a general Queueing System. Currently you can initialise the queue with n customers, and also add a new queue in between simulation. The departure time distributions and number of servers vs time need to be provided.    
+We follow a object oriented approach for creating a general Queueing System. Currently you can initialise the queue with n customers, and also add a new queue in between simulation. The departure time distributions and number of servers vs time need to be provided.      
+A new class for series station - system_ is added.      
 All test cases can be found [here](Queue_class_test.cpp).
 
 
