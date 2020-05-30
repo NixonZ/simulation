@@ -1,7 +1,13 @@
 #include "./simulation.h"
-#include <bits/stdc++.h> 
+
 #define random (float)rand() / RAND_MAX;
-#define T(t) (t - int(t)) + int(t) % 1440
+
+
+// float Normals(float mu,float sigma)
+// {
+  
+// }
+
 float Normals(float mu, float sigma)
 {
     // float U1 = random ;
@@ -16,6 +22,15 @@ float Normals(float mu, float sigma)
     // Normals.second = (sqrt(-2.0 * log(S) / S) * V1) * sigma + mu;
     // return min(Normals.first,Normals.second);
     float U = random;
+    while(1)
+    {
+        if( U > 0.9 )
+        {
+            U = random;
+        }
+        else
+         break;
+    }
     return (-log((1.0 / U) - 1) / 1.702) * sigma + mu;
 }
 float DepartureTimes(float t)
@@ -85,11 +100,12 @@ void simulate_stations(std::vector<station> station_list)
     int discrete_events = 0;
     float t = 0;
     int arriving_customer = 0;
-    float ta = Ts_generator(T(t));
+    float ta = Ts_generator(t);
 
-    temp.print_system_status(T(t));
+    // temp.print_system_status(T(t));
+    temp.logger(t);
 
-    while(discrete_events<50)
+    while(discrete_events<2000)
     {
         std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();
 
@@ -97,23 +113,27 @@ void simulate_stations(std::vector<station> station_list)
 
         t = std::min(least_dep_time, ta);
 
-        temp.server_updates(T(t));
+        temp.server_updates(t);
 
         if(t == ta)
         {
             // std::cout << "---------------------------------> Arrival at Station 0" << endl;
             // update first station for arrival (index =0 station)
-            temp.add_customer_to_system(T(t),arriving_customer);
+            temp.add_customer_to_system(t,arriving_customer);
             arriving_customer++;
-            ta = Ts_generator(T(t));
+            ta = Ts_generator(t);
             // std::cout << "Next arrival time :" << ta << endl;
         }
         else
-            temp.departure_updates(least_station_index,T(t));
+            temp.departure_updates(least_station_index,t);
 
-        temp.print_system_status(T(t));
+        // temp.print_system_status(T(t));
+        temp.logger(t);
         discrete_events++;
+        std::cout<<discrete_events<<endl;
     }
+    std::cout<<"Writing to CSV";
+    temp.write_to_csv();
 }
 
 void simulate_station(station temp)
@@ -122,21 +142,21 @@ void simulate_station(station temp)
     int discrete_events = 0;
     int arriving_customer = 0;
     float t = 0;
-    float ta = Ts_generator(T(t));
+    float ta = Ts_generator(t);
     while (discrete_events < 50)
     {
         t = std::min(temp.find_min_td(), ta);
-        temp.server_updates(T(t));
+        temp.server_updates(t);
         if (t == ta)
         {
             //arrival happening
-            temp.add_customer_to_station(T(t), arriving_customer);
+            temp.add_customer_to_station(t, arriving_customer);
             arriving_customer++;
-            ta = Ts_generator(T(t));
+            ta = Ts_generator(t);
         }
         else
-            temp.departure_updates(T(t));
-        temp.print_station_status(T(t));
+            temp.departure_updates(t);
+        temp.print_station_status(t);
         discrete_events++;
     }
 }
@@ -146,7 +166,7 @@ int main()
     srand((unsigned)time(NULL));
 
     std:: vector<station>station_list ;
-    station_list.push_back( station(2,2,10) );
+    // station_list.push_back( station(2,2,10) );
     station_list.push_back( station( 5, C , [](float t) -> float { return Normals(30, 10); } ) );
     station_list.push_back( station( 4, 4 , DepartureTimes  ) );
 
