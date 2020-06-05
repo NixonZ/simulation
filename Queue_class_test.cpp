@@ -1,12 +1,16 @@
-#include "./simulation.h"
-
+#include "components/tandem.h"
 #define random (float)rand() / RAND_MAX;
+#define PI acos(-1) 
+#define square(x) x*x
 
 
-// float Normals(float mu,float sigma)
-// {
-  
-// }
+float log_Normals(float mu, float sigma)
+{
+    float mu_ = log(mu * mu / sqrt(mu * mu + sigma * sigma));
+    float sigma_ = sqrt(log(1 + sigma * sigma / mu * mu));
+    float U = random;
+    return U;
+}
 
 float Normals(float mu, float sigma)
 {
@@ -22,17 +26,18 @@ float Normals(float mu, float sigma)
     // Normals.second = (sqrt(-2.0 * log(S) / S) * V1) * sigma + mu;
     // return min(Normals.first,Normals.second);
     float U = random;
-    while(1)
+    while (1)
     {
-        if( U > 0.9 )
+        if (U > 0.9)
         {
             U = random;
         }
         else
-         break;
+            break;
     }
     return (-log((1.0 / U) - 1) / 1.702) * sigma + mu;
 }
+
 float DepartureTimes(float t)
 {
     if (t < 300.00)
@@ -43,7 +48,7 @@ float DepartureTimes(float t)
         return Normals(30, 10);
 }
 
-int C(float t)
+int C_doctors(float t)
 {
     if (t < 10)
         return 3;
@@ -63,6 +68,19 @@ int C(float t)
         return 4;
     else
         return 3;
+}
+int C_nurses(float t)
+{
+    if (t < 130)
+        return 8;
+    else if (t < 7 * 60 + 30)
+        return 5;
+    else if (t < 10 * 60 + 30)
+        return 6;
+    else if (t < 22 * 60 + 30)
+        return 9;
+    else
+        return 8;
 }
 
 float lambda(float t)
@@ -90,7 +108,7 @@ float Ts_generator(float s)
 
 void simulate_stations(std::vector<station> station_list)
 {
-    system_ temp (station_list);
+    tandem temp (station_list);
 
     float least_dep_time = 0;
     int least_station_index = 0;
@@ -105,7 +123,7 @@ void simulate_stations(std::vector<station> station_list)
     // temp.print_system_status(T(t));
     temp.logger(t);
 
-    while(discrete_events<2000)
+    while(discrete_events<5000)
     {
         std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();
 
@@ -127,7 +145,7 @@ void simulate_stations(std::vector<station> station_list)
         else
             temp.departure_updates(least_station_index,t);
 
-        // temp.print_system_status(T(t));
+        // temp.print_tandemstatus(T(t));
         temp.logger(t);
         discrete_events++;
         std::cout<<discrete_events<<endl;
@@ -167,8 +185,8 @@ int main()
 
     std:: vector<station>station_list ;
     // station_list.push_back( station(2,2,10) );
-    station_list.push_back( station( 5, C , [](float t) -> float { return Normals(30, 10); } ) );
-    station_list.push_back( station( 4, 4 , DepartureTimes  ) );
+    station_list.push_back( station( 9, C_nurses , [](float t) -> float { return Normals(10, 2); } ) );
+    station_list.push_back( station( 5, C_doctors , [](float t) -> float { return Normals(30,10); }  ) );
 
     simulate_stations(station_list) ;
 
