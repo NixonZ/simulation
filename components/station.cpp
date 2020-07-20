@@ -362,10 +362,76 @@ void station::logger(int station_id, float t)
     logi.close();
 }
 
-void station::write_to_csv()
+void station::logger(std::string station_id, float t)
+{
+    std::ofstream logi;
+    if (t == 0)
+    {
+        logi.open("./logs/log_" + station_id + ".txt", std::ofstream::out);
+    }
+    else
+        logi.open("./logs/log_" + station_id + ".txt", std::ios_base::app);
+
+    logi << "----System Status----" << endl;
+    logi << "Present time:" << t << endl;
+    logi << "Number of People Present:" << n << endl;
+    logi << "Cummulative Number of Arrivals by t:" << Na << endl;
+    logi << "Number of Servers:" << c << endl;
+
+    logi << "Server List:"
+         << "[";
+    for (int &x : server_status)
+        logi << x << ',';
+    logi << "]" << endl;
+
+    logi << "Current Customers:"
+         << "[";
+    for (int &x : current_customer)
+        logi << x << ',';
+    logi << "]" << endl;
+
+    logi << "Counter Variable:"
+         << "[";
+    for (auto &x : counter_variable)
+    {
+        logi << "{";
+        logi << std::get<0>(x) << ',';
+        logi << std::get<1>(x) << ',';
+        logi << std::get<2>(x) << ',';
+        logi << std::get<3>(x) << ',';
+        logi << std::get<4>(x) << ',';
+        logi << std::get<5>(x);
+        logi << "};";
+    }
+    logi << "]" << endl;
+
+    logi << "Departure times:"
+         << "[";
+    for (float &x : td)
+        logi << x << ',';
+    logi << "]" << endl;
+
+    logi << "Queue list: [";
+    std::vector<int> v;
+    while (!current_queue.empty())
+    {
+        int x = current_queue.front();
+        v.push_back(x);
+        current_queue.pop();
+    }
+    for (auto &x : v)
+    {
+        logi << x << ',';
+        current_queue.push(x);
+    }
+    logi << ']' << endl;
+    logi.close();
+}
+
+void station::write_to_csv(std::string file_name)
 {
     std::ofstream data;
-    data.open("data.csv", std::ofstream::out);
+    data.open( file_name + ".csv", std::ofstream::out);
     data << "Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,\n";
     for (auto &x : counter_variable)
     {
@@ -382,3 +448,15 @@ void station::write_to_csv()
     }
 }
 
+void station::reset_queue()
+{
+    server_status.clear();
+    server_status.assign(mxN, -1);
+    current_customer.clear();
+    current_customer.assign(mxN,-1);
+    while(!current_queue.empty())
+        current_queue.pop();
+    td.clear();
+    td.assign(mxN, INF);
+    counter_variable.clear();
+}

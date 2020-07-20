@@ -145,9 +145,11 @@ public:
     void server_updates(float t);
     int departure_updates(float t);
     void add_customer_to_station(float t,int customer_id);
-    void write_to_csv();
+    void write_to_csv(std::string file_name);
     std::vector<std::tuple<int, float, int, int, float, float>> get_counter_variable();
     int find_queue_len();
     void logger(int station_id, float t);
+    void logger(std::string station_id, float t);
+    void reset_queue();
 };
 #endif

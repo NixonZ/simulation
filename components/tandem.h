@@ -22,7 +22,7 @@ public:
     void add_customer_to_system(float t, int arriving_customer);
     void departure_updates(int station_index, float t);
     void server_updates(float t);
-    void write_to_csv();
+    void write_to_csv(std::string tandem_name = "data_system");
     void logger(float t);
 };
 #endif

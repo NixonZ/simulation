@@ -92,11 +92,11 @@ void tandem::logger(float t)
         x.logger(l++, t);
 }
 
-void tandem::write_to_csv()
+void tandem::write_to_csv(std::string tandem_name = "data_system")
 {
     std::ofstream data;
 
-    data.open("data_system.csv", std::ofstream::out);
+    data.open( tandem_name + ".csv", std::ofstream::out);
     data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,\n";
 
     int last_customer_in_last_station = 0;
