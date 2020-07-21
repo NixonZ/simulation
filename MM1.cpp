@@ -6,7 +6,7 @@ int main()
     srand((unsigned)time(NULL));
 
     float U = random;
-    int N = 3;
+    int N = 4;
     float total_variance = 0;
     float total_mean = 0;
     float Uj,t,ta,temp,mean,variance,X,pj;
@@ -46,7 +46,7 @@ int main()
                 temp = mean;
                 mean = mean + (X-mean)/(i+1);
                 if(i)
-                    variance = (1-1/i)*variance + (i+1)*(mean - temp)*(mean-temp);
+                    variance = (1-1.0/(float)i)*variance + (i+1)*(mean - temp)*(mean-temp);
                 i++;
             }
             // MM1.logger(std::string("MM1"),t);
