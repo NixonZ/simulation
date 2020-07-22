@@ -6,7 +6,7 @@ int main()
     srand((unsigned)time(NULL));
 
     float U = random;
-    int N = 4;
+    int N = 1;
     float total_variance = 0;
     float total_mean = 0;
     float Uj,t,ta,temp,mean,variance,X,pj;
@@ -14,6 +14,7 @@ int main()
     for(int j=1;j<=N;j++)
     {
         // station MM1(1,1, [j,N](float t) -> float { float U = random; float Uj = (U+j-1)/N; return -log(Uj)/0.2; } );
+        
         station MM1(1,1, [](float t) -> float { float U = random; return -log(U)/0.2; } );
         U = random;
         Uj = (U+j-1)/N;
@@ -43,6 +44,10 @@ int main()
                     if( std::get<0>(x) == customer_departing )
                         X = std::get<4>(x) - std::get<1>(x);
                 }
+                if(X>5)
+                    X=1;
+                else
+                    X=0;
                 temp = mean;
                 mean = mean + (X-mean)/(i+1);
                 if(i)
