@@ -13,15 +13,13 @@ class station
                                           2 : Server is working but will be closed on service completion \n
                                           0 : Server empty \n
                                           1 : Server.  */
-    std::vector<int> current_customer;
-    std::queue<int> current_queue;
-    std::vector<float> td;
-    int c;
-    int n;
-    int Na;
-    std::vector< std::tuple<int,float,int,int,float,float> > counter_variable;
-
-    /* 
+    std::vector<int> current_customer; /*!< The current customers present in the server.*/
+    std::queue<int> current_queue; /*!< The current queue of the system.*/
+    std::vector<float> td; /*!< Departure times.*/
+    int c; /*!< Number of servers.*/
+    int n; /*!< Number of customers in system*/
+    int Na; /*!< Cummulative number of arrivals.*/
+    std::vector< std::tuple<int,float,int,int,float,float> > counter_variable; /*!< 
     0 - Customer id
     1 - Time of arrival
     2 - Number of people in system at arrival
@@ -30,10 +28,10 @@ class station
     5 - Departure times
     */
 
-    using C_type = std::function<int(float t)>;
-    using event_type = std::function<float(float t)>;
-    C_type C;
-    event_type DepartureTimes;
+    using C_type = std::function<int(float t)>; /*!< Function type float -> int*/
+    using event_type = std::function<float(float t)>; /*!< Function type float -> float*/
+    C_type C; /*!< Server update function */
+    event_type DepartureTimes; /*!< Service time generator. */
 
 public:
     station(long init_mxN, C_type C_para, event_type dept_para, float t = 0, int init_n = 0)
@@ -138,7 +136,7 @@ public:
             current_queue.push(i);
         }
     }
-
+    
     void print_station_status(float t);
     int find_min_k();
     float find_min_td();

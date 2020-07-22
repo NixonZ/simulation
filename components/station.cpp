@@ -1,4 +1,13 @@
 #include "station.h"
+
+/** @brief Finds the server index which has the minimal departure time.
+ *
+ *  @details
+ *   Finds the server index with departure time with a simple loop.
+ *   Completed in O(mxN)
+ * 
+ *  @return     Index of the server with minimum departure time.
+ */
 int station::find_min_k()
 {
     float tk = td[0];
@@ -13,15 +22,42 @@ int station::find_min_k()
     }
     return k;
 }
-
+/** @brief Finds the minimum departure time of all the servers working.
+ *
+ *  @details
+ *   Uses station::find_min_k .
+ * 
+ *  @see station::find_min_k
+ *  @return     Minimum departure time.
+ */
 float station::find_min_td()
 {
     return td[find_min_k()];
 }
 
+/// @brief Makes server updates.
+///
+///  @param t  The time variable.
+///
+///  @details
+///  This function is required when the servers are dynamic. This\n
+///  code manages the opening and closing of servers.Directly modifies station::server_status\n
+///  Whenever the number of active server changes, the following rules govern the opening and closing:\n
+///  1. Server closure:       
+///    1. The servers currently working(1) are set to 2 ( i.e. will be closed(-1) as soon    
+///        as server becomes idle(0) again).
+///    2. If more server needs to be closed after 1. then the idle(0) servers are closed(-1).\n
+///  2. Server opening:
+///    1. The inactive(-1) servers are set to active again and the front the queue     
+///       is pushed to the newly openend servers and their departure times are generated.
+///    2. If still more servers are needed, the servers with status 2 are opened(1).
+///
+///  @note     Must be called every time the number of servers (station::c) change value as is defined by the server update function (station::C).
+///  @warning  Assumes that the server update function (station::C) is well-defined.
+///  
 void station::server_updates(float t)
 {
-    int c_ = C((t - int(t)) + int(t) % 1440);
+    int c_ = C(T(t));
     if (c_ > this->c)
     // Server Adding
     {
@@ -154,6 +190,42 @@ void station::server_updates(float t)
     this->c = c_;
 }
 
+/// @brief Add a single customer to the front of the system.
+///  @param t  The time variable.
+///  @param customer_id id of the customer which is to be added. Maintain a counter for the customers.\n
+///                     Call this function whenever the time variable reaches an arrival time.
+///  @details
+///  Increases the number of customer present in the system. Creates a new entry in station::counter_variable for the\n
+///  incoming customer. The customer is sent to the first empty server or in case no empty server is found,\n
+///  to the back of the queue. (station::current_queue).
+///
+///  @note     Must be called when time variable reahes next time of arrival.
+///  @warning  Assumes customer id given are sequential integers.
+///
+///  Example:
+///  @code
+///     station temp; //suitably defined
+///     int discrete_events = 0;
+///     int arriving_customer = 0;
+///     float t = 0;
+///     float ta = Ts_generator(t);
+///     while (discrete_events < 50)
+///     {
+///         t = std::min(temp.find_min_td(), ta);
+///         temp.server_updates(t);
+///         if (t == ta)
+///         {
+///             //arrival happening
+///             temp.add_customer_to_station(t, arriving_customer);
+///             arriving_customer++;
+///             ta = Ts_generator(t);
+///         }
+///         else
+///             temp.departure_updates(t);
+///         temp.print_station_status(t);
+///         discrete_events++;
+///     }
+///  @endcode
 void station::add_customer_to_station(float t, int customer_id)
 {
     ++n;
@@ -178,11 +250,59 @@ void station::add_customer_to_station(float t, int customer_id)
     ++Na;
 }
 
+/// @brief Gives back the station::counter_variable.
+///
+/// @return station::counter_variable.
+///
+///  Example: 
+///  @code 
+///     for(auto&x: MM1.get_counter_variable())
+///             {
+///                 if( std::get<0>(x) == customer_departing )
+///                     X = std::get<4>(x) - std::get<1>(x);
+///             }
+///  @endcode
 std::vector<std::tuple<int, float, int, int, float, float>> station::get_counter_variable()
 {
     return counter_variable;
 }
 
+/// @brief Makes departure updates.
+///
+///  @param t  The time variable.
+///
+///  @details
+///  Removes the customer whose service is completed at time t. Updates the entry in station::counter_variable for the\n
+///  outgoing customer. A new customer is added to the server or else server is closed if the server status was 2 or\n
+///  the server is set to idle if the system is empty.
+///
+///  @return  The customer id of the customer departing.
+///  @note     Must be called when time variable reahes next departure time.
+///
+///  Example:
+///  @code
+///     station temp; //suitably defined
+///     int discrete_events = 0;
+///     int arriving_customer = 0;
+///     float t = 0;
+///     float ta = Ts_generator(t);
+///     while (discrete_events < 50)
+///     {
+///         t = std::min(temp.find_min_td(), ta); //station::find_mid_td
+///         temp.server_updates(t);
+///         if (t == ta)
+///         {
+///             //arrival happening
+///             temp.add_customer_to_station(t, arriving_customer);
+///             arriving_customer++;
+///             ta = Ts_generator(t);
+///         }
+///         else
+///             temp.departure_updates(t);
+///         temp.print_station_status(t);
+///         discrete_events++;
+///     }
+///  @endcode
 int station::departure_updates(float t)
 {
     int k = find_min_k();
@@ -236,6 +356,8 @@ int station::departure_updates(float t)
     return customer_id;
 }
 
+/// @brief Beautifully outputs station status to the console.
+/// @param t The time variable
 void station::print_station_status(float t)
 {
     std::cout << "----System Status----" << endl;
@@ -296,6 +418,9 @@ void station::print_station_status(float t)
         std::cout << ']' << endl;
 }
 
+/// @brief Beautifully outputs station status a file in folder logs.
+/// @param station_id Used when the stations are sequential. Used mostly in tandem class.
+/// @param t Time variable
 void station::logger(int station_id, float t)
 {
     std::ofstream logi;
@@ -362,6 +487,9 @@ void station::logger(int station_id, float t)
     logi.close();
 }
 
+/// @brief Beautifully outputs station status a file in folder logs.
+/// @param station_id Used when a uninque name is to be given to the text file.
+/// @param t Time variable.
 void station::logger(std::string station_id, float t)
 {
     std::ofstream logi;
@@ -428,6 +556,8 @@ void station::logger(std::string station_id, float t)
     logi.close();
 }
 
+/// @brief Writes the station::counter_variable to a csv file.
+/// @param file_name The name of the csv file to be created.
 void station::write_to_csv(std::string file_name)
 {
     std::ofstream data;
@@ -448,6 +578,10 @@ void station::write_to_csv(std::string file_name)
     }
 }
 
+/// @brief Resets the queue.
+/// @details Resets station::server_status,station::current_customer,station::current_queue and station::td.\n
+///          Also clears station::counter_variable. Use when a queue is to be used afresh.
+/// @note Currently not working.
 void station::reset_queue()
 {
     server_status.clear();
