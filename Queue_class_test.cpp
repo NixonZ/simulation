@@ -1,16 +1,8 @@
 #include "components/tandem.h"
+#include <sstream>
 #define random (float)rand() / RAND_MAX;
 #define PI acos(-1) 
 #define square(x) x*x
-
-
-float log_Normals(float mu, float sigma)
-{
-    float mu_ = log(mu * mu / sqrt(mu * mu + sigma * sigma));
-    float sigma_ = sqrt(log(1 + sigma * sigma / mu * mu));
-    float U = random;
-    return U;
-}
 
 float Normals(float mu, float sigma)
 {
@@ -106,6 +98,12 @@ float Ts_generator(float s)
     }
 }
 
+float exponentialrv(float lambda)
+{
+    float U = random;
+    return -log(U)/lambda;
+}
+
 void simulate_stations(std::vector<station> station_list)
 {
     tandem temp (station_list);
@@ -151,17 +149,17 @@ void simulate_stations(std::vector<station> station_list)
         std::cout<<discrete_events<<endl;
     }
     std::cout<<"Writing to CSV";
-    temp.write_to_csv();
+    temp.write_to_csv("tandem");
 }
 
 void simulate_station(station temp)
 {
-    temp.print_station_status(0);
+    // temp.print_station_status(0);
     int discrete_events = 0;
     int arriving_customer = 0;
     float t = 0;
-    float ta = Ts_generator(t);
-    while (discrete_events < 50)
+    float ta = exponentialrv(0.1);
+    while (discrete_events < 5000)
     {
         t = std::min(temp.find_min_td(), ta);
         temp.server_updates(t);
@@ -170,29 +168,78 @@ void simulate_station(station temp)
             //arrival happening
             temp.add_customer_to_station(t, arriving_customer);
             arriving_customer++;
-            ta = Ts_generator(t);
+            ta = t + exponentialrv(0.1);
         }
         else
             temp.departure_updates(t);
-        temp.print_station_status(t);
+        // temp.print_station_status(t);
         discrete_events++;
+        // temp.logger("lognormal",t);
     }
+    temp.write_to_csv("./output/dataMG1");
 }
 
+std::vector<float> read_csv(std::string filename,int index = 1)
+{
+    std::ifstream fin;
+    fin.open(filename,std::ifstream::in);
+    std::string temp,line,word;
+    std::vector<std::string> row;
+    std::vector<float> data;
+    while(!fin.eof())
+    {
+        row.clear();
+        std::getline(fin,line,'\n');
+        std::stringstream s(line);
+        while (std::getline(s, word, ',')) 
+        { 
+            row.push_back(word); 
+        } 
+        try
+        {
+            data.push_back( std::stof(row[index]) );
+        }
+        catch(const std::exception& e)
+        {
+            // std::cerr << e.what() << '\n';
+            continue;
+        }
+    }
+    fin.close();
+    return data;
+}
 int main()
 {
     srand((unsigned)time(NULL));
 
-    std:: vector<station>station_list ;
+    // std:: vector<station>station_list ;
     // station_list.push_back( station(2,2,10) );
-    station_list.push_back( station( 9, C_nurses , [](float t) -> float { return Normals(10, 2); } ) );
-    station_list.push_back( station( 5, C_doctors , [](float t) -> float { return Normals(30,10); }  ) );
+    // station_list.push_back( station( 9, C_nurses , [](float t) -> float { return Normals(10, 2); } ) );
+    // station_list.push_back( station( 5, C_doctors , [](float t) -> float { return Normals(30,10); }  ) );
 
-    simulate_stations(station_list) ;
+    // simulate_stations(station_list) ;
 
 
     // Simulation for Single server 
     // station temp(5, [](float t)->int { return 5; } , [](float t)->float { return Normals(30,10); } ); //or
     // station temp(5,C,DepartureTimes,0,0);
+
+    std::vector<float> lognormal_values = read_csv("lognormal.csv",1);
+
+    station temp(1,1,
+    [lognormal_values](float t)-> float 
+    { 
+        float U = random; 
+        int index = (int)(U*lognormal_values.size());
+        try
+        {
+            return lognormal_values[index];
+        }
+        catch(const std::exception& e)
+        {
+            return lognormal_values[index-1];
+        }
+    });
+    simulate_station(temp);
     return 0 ;
 }

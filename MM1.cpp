@@ -6,7 +6,7 @@ int main()
     srand((unsigned)time(NULL));
 
     float U = random;
-    int N = 1;
+    int N = 10;
     float total_variance = 0;
     float total_mean = 0;
     float Uj,t,ta,temp,mean,variance,X,pj;
@@ -15,7 +15,7 @@ int main()
     {
         // station MM1(1,1, [j,N](float t) -> float { float U = random; float Uj = (U+j-1)/N; return -log(Uj)/0.2; } );
         
-        station MM1(1,1, [](float t) -> float { float U = random; return -log(U)/0.2; } );
+        station MM1(1,1, [](float t) -> float { float U = random; return -log(U)/0.1; } );
         U = random;
         Uj = (U+j-1)/N;
         discrete_events = 0;
@@ -24,7 +24,7 @@ int main()
         ta = t-log(Uj)/0.1;
         temp=mean=variance = 0;
         i = 0;
-        while(discrete_events<10000)
+        while(discrete_events<1000)
         {
             t = std::min(MM1.find_min_td(), ta);
             MM1.server_updates(t);
@@ -43,8 +43,10 @@ int main()
                 {
                     if( std::get<0>(x) == customer_departing )
                         X = std::get<4>(x) - std::get<1>(x);
-                }
-                if(X>5)
+                    float control = std::get<4>(x);
+                }   
+                // Making Indicator Variable
+                if(X>120)
                     X=1;
                 else
                     X=0;
@@ -62,7 +64,7 @@ int main()
         std::cout<<"Mean:" <<mean <<'\n' <<"Variance:" <<variance <<'\n' <<"pj:"<<pj<<'\n';
         total_variance += variance*pj*pj;
         total_mean += mean*pj;
-        // MM1.write_to_csv(std::string("MM1"+std::to_string(j)));
+        // MM1.write_to_csv(std::string("./output/MM1"+std::to_string(j)));
         // MM1.reset_queue();
     }
     std::cout<<"\nTotal mean:" <<total_mean <<'\n';
