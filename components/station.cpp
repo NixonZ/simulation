@@ -594,3 +594,33 @@ void station::reset_queue()
     td.assign(mxN, INF);
     counter_variable.clear();
 }
+
+std::vector<float> read_csv(std::string filename,int index = 1)
+{
+    std::ifstream fin;
+    fin.open(filename,std::ifstream::in);
+    std::string temp,line,word;
+    std::vector<std::string> row;
+    std::vector<float> data;
+    while(!fin.eof())
+    {
+        row.clear();
+        std::getline(fin,line,'\n');
+        std::stringstream s(line);
+        while (std::getline(s, word, ',')) 
+        { 
+            row.push_back(word); 
+        } 
+        try
+        {
+            data.push_back( std::stof(row[index]) );
+        }
+        catch(const std::exception& e)
+        {
+            // std::cerr << e.what() << '\n';
+            continue;
+        }
+    }
+    fin.close();
+    return data;
+}

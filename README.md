@@ -2,15 +2,59 @@
         
 This repo is based on the paper [Accurate ED Wait Time Prediction by Erjie Ang et Al](https://web.stanford.edu/~bayati/papers/edwait.pdf). We are using simulated data and the model prescribed in the paper to study how wait times can be predicted.         
 Further, we are also going to change the linear model to incorporate other ML techniques and hopefully create a better predictor.    
+**Check out our code documentation [here](https://nixonz.github.io/simulation/).**(Currently in work)
 
-`Simulation`    
-We follow a object oriented approach for creating a general Queueing System. Currently you can initialise the queue with n customers, and also add a new queue in between simulation. The departure time distributions and number of servers vs time need to be provided.      
-A new class for series station - system_ is added.      
+`Simulation Models`      
+We follow a object oriented approach for creating a general Queueing System. Three main classes are declared in the components folder:
+1. [station](https://nixonz.github.io/simulation/classstation.html) : A single queueing system. You can define the number of servers (even dynamic i.e. changing with time). Also you can provide custom departure time distribution by providing the inverse distribution function ( pass a function { float -> float } to station class that generates the random service times). You'll have to use one the following constructor: 
+    ~~~
+    station (long init_mxN, C_type C_para, event_type dept_para, float t=0, int init_n=0)
+
+    station (long init_mxN, C_type C_para, float init_dept, float t=0, int init_n=0)
+
+    station (long init_mxN, int init_C, float init_dept, float t=0, int init_n=0)
+
+    station (long init_mxN, int init_C, event_type init_dept, float t=0, int init_n=0)
+    ~~~    
+    Here C_type is Function type float -> int and event_type is Function type float -> float.     
+    Example of simple queueing system and more information on how to simulate can be found in examples folder.
+
+2. [tandem](https://nixonz.github.io/simulation/classtandem.html) : You can pass in a vector of station objects to group multiple queueing system in series.
+
+3. [graph](https://nixonz.github.io/simulation/classgraph.html) : Currently in work but the idea is to create a directed acyclic graph of station objects.
+
+If you have already generated distribution for arrival or service times you can use,
+~~~
+std::vector<float> read_csv(std::string filename,int index); //index is the column to be read.
+~~~
+to read the data out of a csv file.
+and then the data can be used in our model in the following way:
+~~~
+std::vector<float> service_times = read_csv("lognormal.csv",1);
+std::vector<float> interarrivaltimes = read_csv("lognormal.csv",2);
+
+station MG1(1,1,
+[service_times](float t) -> float
+{
+    float U = random;
+    int index = (int)(U*service_times.size());
+    try
+    {
+        return service_times[index];
+    }
+    catch(const std::exception& e)
+    {
+        // std::cerr << e.what() << '\n'; 
+        return service_times[index-1];
+    }
+});
+~~~
+
 All test cases can be found [here](Queue_class_test.cpp).
 
 
 ***
 Project by-    
-**Nalin Shani** 2018ME10057    
-**Achintya Eeshan** 2018ME10094      
+**Nalin Shani** 2018ME10057 Nalin.Shani.me118@mech.iitd.ac.in     
+**Achintya Eeshan** 2018ME10094 me1180094@iitd.ac.in     
 _B.Tech IIT Delhi Mechanical Engineering_

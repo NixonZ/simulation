@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <sstream>
 #define INF 3 * std::numeric_limits<float>::max()
 #define endl "\n"
 #define T(t) (t - int(t)) + int(t) % 1440

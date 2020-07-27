@@ -1,5 +1,4 @@
 #include "components/tandem.h"
-#include <sstream>
 #define random (float)rand() / RAND_MAX;
 #define PI acos(-1) 
 #define square(x) x*x
@@ -179,35 +178,6 @@ void simulate_station(station temp)
     temp.write_to_csv("./output/dataMG1");
 }
 
-std::vector<float> read_csv(std::string filename,int index = 1)
-{
-    std::ifstream fin;
-    fin.open(filename,std::ifstream::in);
-    std::string temp,line,word;
-    std::vector<std::string> row;
-    std::vector<float> data;
-    while(!fin.eof())
-    {
-        row.clear();
-        std::getline(fin,line,'\n');
-        std::stringstream s(line);
-        while (std::getline(s, word, ',')) 
-        { 
-            row.push_back(word); 
-        } 
-        try
-        {
-            data.push_back( std::stof(row[index]) );
-        }
-        catch(const std::exception& e)
-        {
-            // std::cerr << e.what() << '\n';
-            continue;
-        }
-    }
-    fin.close();
-    return data;
-}
 int main()
 {
     srand((unsigned)time(NULL));

@@ -150,4 +150,7 @@ public:
     void logger(std::string station_id, float t);
     void reset_queue();
 };
+
+
+std::vector<float> read_csv(std::string filename,int index);
 #endif
