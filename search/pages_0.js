@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['simulation_20for_20delay_20prediction_2e',['Simulation for delay prediction.',['../index.html',1,'']]]
+  ['single_20server_20queue_20simulation',['Single Server Queue Simulation',['../index.html',1,'']]]
 ];
