@@ -1,8 +1,8 @@
 # Simulation for delay prediction.
         
-This repo is based on the paper [Accurate ED Wait Time Prediction by Erjie Ang et Al](https://web.stanford.edu/~bayati/papers/edwait.pdf). We are using simulated data and the model prescribed in the paper to study how wait times can be predicted.         
+We follow a object oriented approach for creating a general Queueing System and getting simulated wait time data.
 Further, we are also going to change the linear model to incorporate other ML techniques and hopefully create a better predictor.    
-**Check out our code documentation [here](https://nixonz.github.io/simulation/).**(Currently in work)
+**Check out our code documentation [here](https://nixonz.github.io/simulation/).**(Currently in work).
 
 `Simulation Models`      
 We follow a object oriented approach for creating a general Queueing System. Three main classes are declared in the components folder:

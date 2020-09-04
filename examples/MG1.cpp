@@ -47,8 +47,10 @@ int main()
             for(auto&x: MG1.get_counter_variable())
             {
                 if( std::get<0>(x) == customer_departing )
+                {
                     X = std::get<4>(x) - std::get<1>(x);
-                control = std::get<4>(x) - std::get<4>(MG1.get_counter_variable()[customer_departing-1]);
+                    control = std::get<4>(x) - std::get<4>(MG1.get_counter_variable()[customer_departing-1]);
+                }
             }  
             X = control*X;
             // Making Indicator Variable

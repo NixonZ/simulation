@@ -148,7 +148,8 @@ public:
     int find_queue_len();
     void logger(int station_id, float t);
     void logger(std::string station_id, float t);
-    void reset_queue();
+    void reset_queue(float t);
+    float minimum_residual_time(float t);
 };
 
 

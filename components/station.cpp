@@ -582,8 +582,10 @@ void station::write_to_csv(std::string file_name)
 /// @details Resets station::server_status,station::current_customer,station::current_queue and station::td.\n
 ///          Also clears station::counter_variable. Use when a queue is to be used afresh.
 /// @note Currently not working.
-void station::reset_queue()
+void station::reset_queue(float t)
 {
+    n=0;
+    Na = n;
     server_status.clear();
     server_status.assign(mxN, -1);
     current_customer.clear();
@@ -593,8 +595,23 @@ void station::reset_queue()
     td.clear();
     td.assign(mxN, INF);
     counter_variable.clear();
+    this->server_updates(T(t));
 }
 
+/// @brief Gives the minimum residual time i.e. time left for next departure.
+/// @details The minimum residual time is directlty related to the waiting time of a customer.
+/// @param t Time variable
+float station::minimum_residual_time(float t)
+{
+    return this->find_min_td()-t;
+}
+
+
+/// @brief Reads data from a CSV file.
+/// @details Will read a particular column from the CSV containing observed values of random variables.
+/// @param filename The path of the CSV file from which data is to be read.
+/// @param index Index is the column number to be read.\n
+///              Default 1. Column 0 is assumed to be the uniform random numbers generated.
 std::vector<float> read_csv(std::string filename,int index = 1)
 {
     std::ifstream fin;

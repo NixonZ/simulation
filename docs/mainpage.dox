@@ -1,9 +1,0 @@
-/**
-@brief Documentation for my project
-@author NixonZ and Achintya777
-@file Mainpage.dox
-*/
-/**
-@mainpage Simulation for delay prediction.
-We follow a object oriented approach for creating a general Queueing System.
-*/
