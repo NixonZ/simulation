@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dynamic C-server Queueing System Simulation: Single Server Queue Simulation</title>
+<title>Dynamic C-server Queueing System Simulation: Main Page</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,21 +62,61 @@ $(function() {
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Single Server Queue Simulation </div>  </div>
+<div class="title">Dynamic C-server Queueing System Simulation Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Follow these basic steps to simulate a basic queueing system. </p><h2>Initialisation</h2>
-<p>Intialise the station class </p><div class="fragment"><div class="line">station (long init_mxN, C_type C_para, event_type dept_para, float t=0, int init_n=0)</div><div class="line"></div><div class="line">station (long init_mxN, C_type C_para, float init_dept, float t=0, int init_n=0)</div><div class="line"></div><div class="line">station (long init_mxN, int init_C, float init_dept, float t=0, int init_n=0)</div><div class="line"></div><div class="line">station (long init_mxN, int init_C, event_type init_dept, float t=0, int init_n=0)</div></div><!-- fragment --><p> Here <code>init_mxN</code> is the maximum number of servers in the station. Here <code>C_type</code> is Function type <code>float -&gt; int</code> and <code>event_type</code> is Function type <code>float -&gt; float</code>.</p>
-<p>You can either put <b>constant number of servers</b> in the system or create a function for number of server (<b>Dynamic servers</b>) in the for example, </p><div class="fragment"><div class="line">int C(float t)</div><div class="line">{</div><div class="line">    if (t &lt; 130)</div><div class="line">        return 8;</div><div class="line">    else if (t &lt; 7 * 60 + 30)</div><div class="line">        return 5;</div><div class="line">    else if (t &lt; 10 * 60 + 30)</div><div class="line">        return 6;</div><div class="line">    else if (t &lt; 22 * 60 + 30)</div><div class="line">        return 9;</div><div class="line">    else</div><div class="line">        return 8;</div><div class="line">}</div></div><!-- fragment --><p> Similarly you can either put a constant service time for the servers or create a function which returns a random variable with a specified distribution for example, </p><div class="fragment"><div class="line">float exponentialrv(float lambda)</div><div class="line">{</div><div class="line">    float U = random;</div><div class="line">    return -log(U)/lambda;</div><div class="line">}</div><div class="line">// and then initialize the station.</div><div class="line">station temp(9, C, [](float t)-&gt;float </div><div class="line">{ </div><div class="line">    return exponentialrv(0.1);</div><div class="line">} );</div></div><!-- fragment --><p> <b>Note:</b> You can also use the inbuilt distribution in MS-Excel to generate random variables and then use them in your system. </p><div class="fragment"><div class="line">std::vector&lt;float&gt; lognormal_values = read_csv(&quot;lognormal.csv&quot;,1); // 1 is the column number</div><div class="line"></div><div class="line">station temp(1,1,</div><div class="line">[lognormal_values](float t)-&gt; float </div><div class="line">{ </div><div class="line">    float U = random; </div><div class="line">    int index = (int)(U*lognormal_values.size());</div><div class="line">    try</div><div class="line">    {</div><div class="line">        return lognormal_values[index];</div><div class="line">    }</div><div class="line">    catch(const std::exception&amp; e)</div><div class="line">    {</div><div class="line">        return lognormal_values[index-1];</div><div class="line">    }</div><div class="line">});</div></div><!-- fragment --> <h2>Making time variable, counter variables, system state, event list</h2>
-<p>For discrete-event simulation we need create a global time variable, <code>t</code>. </p><div class="fragment"><div class="line">float t = 0;</div></div><!-- fragment --><p> The system state and counter variable for customers is defined in the station class: </p><div class="fragment"><div class="line">std::vector&lt; std::tuple&lt;int,float,int,int,float,float&gt; &gt; counter_variable; /*!&lt; </div><div class="line">    0 - Customer id</div><div class="line">    1 - Time of arrival</div><div class="line">    2 - Number of people in system at arrival</div><div class="line">    3 - Number of people in queue at arrival</div><div class="line">    4 - Service times</div><div class="line">    5 - Departure times</div><div class="line">    */</div></div><!-- fragment --><p> But we need to create a new counter variable for the arriving customer. </p><div class="fragment"><div class="line">int arriving_customer = 0;</div></div><!-- fragment --><p> The event list for departures is kept in the station class and gets automatically updated after each departure. The event list for arrivals needs to be created manually updated. </p><div class="fragment"><div class="line">float ta = exponentialrv(0.1);</div></div><!-- fragment --><p> Now we can move to running the actual simulation. </p><h2>Running the discrete-event simulation</h2>
-<p>We need to set the actual number of discrete events we want in our simulation. <code>int discrete_events = 0;</code> <em>Every code in this section is for a single discrete-event.</em></p><ul>
-<li>Access the event list and get the minimum departure time of all servers and choose which event is going to happen. <div class="fragment"><div class="line">std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();</div><div class="line">t = std::min(least_dep_time, ta);</div></div><!-- fragment --></li>
-<li>Run the server updates <div class="fragment"><div class="line">temp.server_updates(t);</div></div><!-- fragment --></li>
-<li>Depending on the event ( arrival or departure ), either add customer to the station or do the departure updates. <div class="fragment"><div class="line">if(t == ta)</div><div class="line">{</div><div class="line">    temp.add_customer_to_system(t,arriving_customer);</div><div class="line">    arriving_customer++;</div><div class="line">    ta = Ts_generator(t);</div><div class="line">}</div><div class="line">else</div><div class="line">    temp.departure_updates(least_station_index,t);</div></div><!-- fragment --></li>
-<li>Increase the number of events. <div class="fragment"><div class="line">discrete_events++;</div></div><!-- fragment --></li>
-</ul>
-<p>In the end the loop should look this: </p><div class="fragment"><div class="line">while(discrete_events&lt;5000)</div><div class="line">{</div><div class="line">std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();</div><div class="line"></div><div class="line">t = std::min(least_dep_time, ta);</div><div class="line"></div><div class="line">temp.server_updates(t);</div><div class="line"></div><div class="line">if(t == ta)</div><div class="line">{</div><div class="line">    temp.add_customer_to_system(t,arriving_customer);</div><div class="line">    arriving_customer++;</div><div class="line">    ta = Ts_generator(t);</div><div class="line">}</div><div class="line">else</div><div class="line">    temp.departure_updates(least_station_index,t);</div><div class="line"></div><div class="line">temp.logger(t);</div><div class="line">discrete_events++;</div><div class="line">std::cout&lt;&lt;discrete_events&lt;&lt;endl;</div><div class="line">}</div></div><!-- fragment --><p> <b>Note:</b> <code>temp.logger(t)</code> Beautifully outputs station status in a file in folder logs. </p><h2>Writing the System State in a CSV file</h2>
-<p>After simulation is over, write the counter variable and system state in a CSV. </p><div class="fragment"><div class="line">temp.write_to_csv(&quot;filename&quot;);</div></div><!-- fragment --><p>You can look at the class definition for more details of each function. </p>
+<div class="textblock"><p>We follow a object oriented approach for creating a general Queueing System and getting simulated wait time data. Further, we are also going to change the linear model to incorporate other ML techniques and hopefully create a better predictor.</p>
+<p><b>Check out our code repository <a href="https://github.com/NixonZ/simulation">here</a>.</b>(Currently in work).</p>
+<hr/>
+ <h1>Tutorials</h1>
+<p>Please visit our <a href="https://github.com/NixonZ/simulation/tree/master/examples">examples</a> for various application.</p>
+<p>Following are few examples exaplained briefly.</p>
+<ol type="1">
+<li><a href="md_docs_Single_Server_Queue.html">Single Server Queue Simulation</a></li>
+</ol>
+<hr/>
+<p><code>Simulation Models</code></p>
+<p>We follow a object oriented approach for creating a general Queueing System. Three main classes are declared in the components folder:</p>
+<ol type="1">
+<li><p class="startli"><a href="classstation.html">station</a> : A single queueing system. You can define the number of servers (even dynamic i.e. changing with time).</p>
+<p class="startli">Also you can provide custom departure time distribution by providing the inverse distribution function ( pass a function { float -&gt; float } to station class that generates the random service times).</p>
+<p class="startli">You'll have to use one the following constructor: </p><pre class="fragment">station (long init_mxN, C_type C_para, event_type dept_para, float t=0, int init_n=0)
+
+station (long init_mxN, C_type C_para, float init_dept, float t=0, int init_n=0)
+
+station (long init_mxN, int init_C, float init_dept, float t=0, int init_n=0)
+
+station (long init_mxN, int init_C, event_type init_dept, float t=0, int init_n=0)
+</pre><p class="startli">Here C_type is Function type float -&gt; int and event_type is Function type float -&gt; float.</p>
+<p class="startli">Example of simple queueing system and more information on how to simulate can be found in examples folder.</p>
+</li>
+<li><a href="classtandem.html">tandem</a> : You can pass in a vector of station objects to group multiple queueing system in series.</li>
+<li><a href="classgraph.html">graph</a> : Currently in work but the idea is to create a directed acyclic graph of station objects.</li>
+</ol>
+<p>If you have already generated distribution for arrival or service times you can use, </p><pre class="fragment">std::vector&lt;float&gt; read_csv(std::string filename,int index); //index is the column to be read.
+</pre><p>to read the data out of a csv file. and then the data can be used in our model in the following way: </p><pre class="fragment">std::vector&lt;float&gt; service_times = read_csv("lognormal.csv",1);
+std::vector&lt;float&gt; interarrivaltimes = read_csv("lognormal.csv",2);
+
+station MG1(1,1,
+[service_times](float t) -&gt; float
+{
+    float U = random;
+    int index = (int)(U*service_times.size());
+    try
+    {
+        return service_times[index];
+    }
+    catch(const std::exception&amp; e)
+    {
+        // std::cerr &lt;&lt; e.what() &lt;&lt; '\n'; 
+        return service_times[index-1];
+    }
+});
+</pre><hr/>
+<p> Project by-</p>
+<h3>Nalin Shani <a href="#" onclick="location.href='mai'+'lto:'+'Nal'+'in'+'.Sh'+'an'+'i.m'+'e1'+'18@'+'me'+'ch.'+'ii'+'td.'+'ac'+'.in'; return false;">Nalin<span style="display: none;">.nosp@m.</span>.Sha<span style="display: none;">.nosp@m.</span>ni.me<span style="display: none;">.nosp@m.</span>118@<span style="display: none;">.nosp@m.</span>mech.<span style="display: none;">.nosp@m.</span>iitd<span style="display: none;">.nosp@m.</span>.ac.i<span style="display: none;">.nosp@m.</span>n</a></h3>
+<h3>Achintya Eeshan <a href="#" onclick="location.href='mai'+'lto:'+'me1'+'18'+'009'+'4@'+'iit'+'d.'+'ac.'+'in'; return false;">me118<span style="display: none;">.nosp@m.</span>0094<span style="display: none;">.nosp@m.</span>@iitd<span style="display: none;">.nosp@m.</span>.ac.<span style="display: none;">.nosp@m.</span>in</a></h3>
+<p><em>B.Tech IIT Delhi Mechanical Engineering</em> </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

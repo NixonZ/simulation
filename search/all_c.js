@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['single_20server_20queue_20simulation',['Single Server Queue Simulation',['../index.html',1,'']]],
+  ['single_20server_20queue_20simulation',['Single Server Queue Simulation',['../md_docs_Single_Server_Queue.html',1,'']]],
   ['server_5fstatus',['server_status',['../classstation.html#ae2f64b998ae94d371b1f6f3c85988053',1,'station']]],
   ['server_5fupdates',['server_updates',['../classstation.html#ac217f300ea83de9d5c8a0f3a5ebaf496',1,'station::server_updates()'],['../classtandem.html#a61253f4d91c159a14a9a40208ef390b8',1,'tandem::server_updates()']]],
   ['single_5fserver_5fqueue_2emd',['Single_Server_Queue.md',['../Single__Server__Queue_8md.html',1,'']]],
