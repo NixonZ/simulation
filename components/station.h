@@ -150,6 +150,7 @@ public:
     void logger(std::string station_id, float t);
     void reset_queue(float t);
     float minimum_residual_time(float t);
+    std::tuple<int,int,int> access_system_state(float t); /*!< Server update function */
 };
 
 

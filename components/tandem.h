@@ -5,11 +5,12 @@ class tandem
 {
     std::vector<station> station_list;
     int number_of_station;
-    std::vector<std::tuple<int, float, int, float, float>> system_counter_variable;
+    std::vector<std::tuple<int, float, int,std::vector<std::tuple<int,int,int>>, float, float>> system_counter_variable;
     /* 
     0 - Customer id
     1 - Time of arrival
     2 - Number of people in system at arrival
+    3 - Vector containing information about all the stations
     3 - Service times at last station
     4 - Departure times of system
     */

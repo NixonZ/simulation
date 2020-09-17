@@ -606,6 +606,10 @@ float station::minimum_residual_time(float t)
     return this->find_min_td()-t;
 }
 
+std::tuple<int,int,int> station::access_system_state(float t)
+{
+    return std::make_tuple(  n, current_queue.size(), C(T(t)) );
+}
 
 /// @brief Reads data from a CSV file.
 /// @details Will read a particular column from the CSV containing observed values of random variables.

@@ -11,7 +11,14 @@ void tandem::add_customer_to_system(float t, int arriving_customer)
 {
     N++;
     station_list[0].add_customer_to_station(t, arriving_customer);
-    system_counter_variable.push_back(std::make_tuple(arriving_customer, t, N, 0, 0));
+    std::vector<std::tuple<int,int,int>> temp;
+    for(auto& station:station_list)
+    {
+        temp.push_back(station.access_system_state(t));
+    }
+    system_counter_variable.push_back(
+        std::make_tuple(arriving_customer, t, N,temp, 0, 0)
+        );
 }
 
 std::tuple<int, float> tandem::find_least_dep_time()
@@ -51,8 +58,8 @@ void tandem::departure_updates(int station_index, float t)
         {
             if (departing_customer == std::get<0>(x))
             {
-                std::get<3>(x) = service_time;
-                std::get<4>(x) = t;
+                std::get<4>(x) = service_time;
+                std::get<5>(x) = t;
             }
         }
         // do only departure updates for last station
@@ -97,7 +104,14 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
     std::ofstream data;
 
     data.open( tandem_name + ".csv", std::ofstream::out);
-    data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,\n";
+    data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
+    for(int i=0;i<this->number_of_station;i++)
+    {
+        data << "Number of people at station " <<i <<" at arrival,";
+        data << "Number of people in queue at station " <<i <<" at arrival,";
+        data << "Number of active servers in station " <<i <<',';
+    }
+    data <<"Time of start of service,Departure time,Wait time,\n";
 
     int last_customer_in_last_station = 0;
     for (auto &x : station_list[number_of_station - 1].get_counter_variable())
@@ -112,10 +126,19 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
              << std::get<1>(x) << ","
              << std::get<2>(x) << ","
              << ((int(std::get<1>(x))) % 1440) / 10 << ','
-             << int(std::get<1>(x) / 1440) % 7 << ','
-             << std::get<3>(x) << ","
-             << std::get<4>(x) << ","
-             << (std::get<3>(x) - std::get<1>(x)) << ","
+             << int(std::get<1>(x) / 1440) % 7 << ',';
+
+        for(auto &station_info:std::get<3>(x))
+        {
+            data << std::get<0>(station_info) <<',';
+            data << std::get<1>(station_info) <<',';
+            data << std::get<2>(station_info) <<',';
+        }
+
+
+        data << std::get<4>(x) << ","
+             << std::get<5>(x) << ","
+             << (std::get<4>(x) - std::get<1>(x)) << ","
              << "\n";
         if (std::get<0>(x) == last_customer_in_last_station)
             break;

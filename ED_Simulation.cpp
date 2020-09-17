@@ -74,9 +74,9 @@ void simulate_stations(std::vector<station> station_list)
     float ta = Ts_generator(t);
 
     // temp.print_system_status(T(t));
-    temp.logger(t);
+    // temp.logger(t);
 
-    while(discrete_events<5000)
+    while(discrete_events<1e5)
     {
         std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();
 
@@ -98,11 +98,11 @@ void simulate_stations(std::vector<station> station_list)
         else
             temp.departure_updates(least_station_index,t);
 
-        temp.logger(t);
+        // temp.logger(t);
         discrete_events++;
         std::cout<<discrete_events<<endl;
     }
-    std::cout<<"Writing to CSV";
+    std::cout<<"Writing to CSV\n";
     temp.write_to_csv("ED-Simulation");
 }
 
@@ -110,38 +110,39 @@ int main()
 {
     srand((unsigned)time(NULL));
 
-    std::vector<float> lognormal_values = read_csv("lognormal.csv",1);
+    std::vector<float> lognormal_values_5_3 = read_csv("lognormal.csv",2);
+    std::vector<float> lognormal_values_10_2 = read_csv("lognormal.csv",3);
     
     std::vector<station> station_list ;
 
     station_list.push_back( station( 9, C_nurses,
-     [lognormal_values](float t) -> float
+     [lognormal_values_5_3](float t) -> float
      { 
         float U = random; 
-        int index = (int)(U*lognormal_values.size());
+        int index = (int)(U*lognormal_values_5_3.size());
         try
         {
-            return lognormal_values[index];
+            return lognormal_values_5_3[index];
         }
         catch(const std::exception& e)
         {
-            return lognormal_values[index-1];
+            return lognormal_values_5_3[index-1];
         } 
      }
     ));
 
     station_list.push_back( station( 5, C_doctors, 
-     [lognormal_values](float t) -> float
+     [lognormal_values_10_2](float t) -> float
      {
         float U = random; 
-        int index = (int)(U*lognormal_values.size());
+        int index = (int)(U*lognormal_values_10_2.size());
         try
         {
-            return lognormal_values[index];
+            return lognormal_values_10_2[index];
         }
         catch(const std::exception& e)
         {
-            return lognormal_values[index-1];
+            return lognormal_values_10_2[index-1];
         }
      }
     ));
