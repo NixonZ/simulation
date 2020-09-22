@@ -25,5 +25,7 @@ public:
     void server_updates(float t);
     void write_to_csv(std::string tandem_name);
     void logger(float t);
+    void initialize_CSV(std::string file_name);
+    void dump_counter_variable_memory(std::string file_name);
 };
 #endif

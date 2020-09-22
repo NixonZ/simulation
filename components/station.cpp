@@ -576,6 +576,7 @@ void station::write_to_csv(std::string file_name)
              << (std::get<4>(x) - std::get<1>(x)) << ","
              << "\n";
     }
+    data.close();
 }
 
 /// @brief Resets the queue.

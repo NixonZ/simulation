@@ -76,7 +76,9 @@ void simulate_stations(std::vector<station> station_list)
     // temp.print_system_status(T(t));
     // temp.logger(t);
 
-    while(discrete_events<1e5)
+    temp.initialize_CSV("ED-Simulation");
+
+    while(discrete_events<1000000)
     {
         std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();
 
@@ -100,10 +102,15 @@ void simulate_stations(std::vector<station> station_list)
 
         // temp.logger(t);
         discrete_events++;
+        if(discrete_events%100000==0)
+        {
+            std::cout<<"Writing to CSV\n";
+            temp.dump_counter_variable_memory("ED-Simulation");
+        }
         std::cout<<discrete_events<<endl;
     }
-    std::cout<<"Writing to CSV\n";
-    temp.write_to_csv("ED-Simulation");
+    // std::cout<<"Writing to CSV\n";
+    // temp.write_to_csv("ED-Simulation");
 }
 
 int main()

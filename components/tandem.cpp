@@ -143,5 +143,62 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
         if (std::get<0>(x) == last_customer_in_last_station)
             break;
     }
+    data.close();
 }
 
+void tandem::initialize_CSV(std::string tandem_name = "data_system")
+{
+    std::ofstream data;
+
+    data.open( tandem_name + ".csv", std::ofstream::out);
+    data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
+    for(int i=0;i<this->number_of_station;i++)
+    {
+        data << "Number of people at station " <<i <<" at arrival,";
+        data << "Number of people in queue at station " <<i <<" at arrival,";
+        data << "Number of active servers in station " <<i <<',';
+    }
+    data <<"Time of start of service,Departure time,Wait time,\n";
+    data.close();
+}
+
+void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system")
+{
+    std::ofstream data;
+
+    data.open( tandem_name + ".csv", std::ofstream::app);
+    
+
+    int last_customer_in_last_station = 0;
+    for (auto &x : station_list[number_of_station - 1].get_counter_variable())
+    {
+        if (std::get<0>(x) > last_customer_in_last_station)
+            last_customer_in_last_station = std::get<0>(x);
+    }
+
+    for (auto &x : system_counter_variable)
+    {
+        data << std::get<0>(x) << ","
+             << std::get<1>(x) << ","
+             << std::get<2>(x) << ","
+             << ((int(std::get<1>(x))) % 1440) / 10 << ','
+             << int(std::get<1>(x) / 1440) % 7 << ',';
+
+        for(auto &station_info:std::get<3>(x))
+        {
+            data << std::get<0>(station_info) <<',';
+            data << std::get<1>(station_info) <<',';
+            data << std::get<2>(station_info) <<',';
+        }
+
+
+        data << std::get<4>(x) << ","
+             << std::get<5>(x) << ","
+             << (std::get<4>(x) - std::get<1>(x)) << ","
+             << "\n";
+        if (std::get<0>(x) == last_customer_in_last_station)
+            break;
+    }
+    system_counter_variable.assign(0,{});
+    data.close();
+}
