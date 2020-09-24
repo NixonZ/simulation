@@ -27,7 +27,6 @@ class station
     4 - Service times
     5 - Departure times
     */
-
     using C_type = std::function<int(float t)>; /*!< Function type float -> int*/
     using event_type = std::function<float(float t)>; /*!< Function type float -> float*/
     C_type C; /*!< Server update function */
@@ -151,6 +150,9 @@ public:
     void reset_queue(float t);
     float minimum_residual_time(float t);
     std::tuple<int,int,int> access_system_state(float t); /*!< Server update function */
+    void initialize_CSV(std::string file_name);
+    void dump_counter_variable_memory(std::string file_name);
+    void dump_counter_variable_memory();
 };
 
 

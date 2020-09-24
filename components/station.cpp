@@ -4,7 +4,7 @@
  *
  *  @details
  *   Finds the server index with departure time with a simple loop.
- *   Completed in O(mxN)
+ *   Completed in O(mxN).
  * 
  *  @return     Index of the server with minimum departure time.
  */
@@ -62,7 +62,7 @@ void station::server_updates(float t)
     // Server Adding
     {
         int count_disconnected = 0;
-        for (auto x : server_status)
+        for (auto x : server_status) // O(mxN) redundant can be counted on runtime
         {
             if (x == -1)
             {
@@ -71,20 +71,24 @@ void station::server_updates(float t)
         }
         if (count_disconnected >= c_ - this->c)
         {
-            int cur = c_ - this->c;
-            for (int i = 0; cur > 0; i++)
+            int cur = c_ - this->c; // Number of servers to open
+            for (int i = 0; cur > 0; i++) 
             {
                 if (server_status[i] == -1)
                 {
                     --cur;
+                    // Open server and add customer at front of the Queue.
                     if (!current_queue.empty())
                     {
-                        current_customer[i] = current_queue.front();
+                        current_customer[i] = current_queue.front(); // Front of queue put to newly opened server
 
-                        for (auto &x : counter_variable)
+                        for(int i=counter_variable.size()-1;i>=0;i--)
                         {
-                            if (current_queue.front() == std::get<0>(x))
-                                std::get<4>(x) = t;
+                            if (current_queue.front() == std::get<0>(counter_variable[i]))
+                            {
+                                std::get<4>(counter_variable[i]) = t;
+                                break;
+                            }
                         }
                         current_queue.pop();
                         server_status[i] = 1;
@@ -111,11 +115,15 @@ void station::server_updates(float t)
                     {
                         current_customer[i] = current_queue.front();
 
-                        for (auto &x : counter_variable)
+                        for(int i=counter_variable.size()-1;i>=0;i--)
                         {
-                            if (current_queue.front() == std::get<0>(x))
-                                std::get<4>(x) = t;
+                            if (current_queue.front() == std::get<0>(counter_variable[i]))
+                            {
+                                std::get<4>(counter_variable[i]) = t;
+                                break;
+                            }
                         }
+
                         current_queue.pop();
                         server_status[i] = 1;
                         td[i] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
@@ -231,7 +239,7 @@ void station::add_customer_to_station(float t, int customer_id)
     ++n;
     std::vector<int> empty_servers;
 
-    for (int i = 0; i < mxN; i++)
+    for (int i = 0; i < mxN; i++) // O(mxN)
         if (server_status[i] == 0)
             empty_servers.push_back(i);
 
@@ -305,19 +313,25 @@ std::vector<std::tuple<int, float, int, int, float, float>> station::get_counter
 ///  @endcode
 int station::departure_updates(float t)
 {
-    int k = find_min_k();
+    int k = find_min_k(); //O(mxN)
     int tk = td[k];
     --n;
 
     int find_customer = std::get<0>(counter_variable[0]);
 
-    for (auto &x : counter_variable)
+    int index = 0;
+    for (int i = counter_variable.size()-1;i>=0;i--)
     {
-        if (current_customer[k] == std::get<0>(x))
-            find_customer = std::get<0>(x);
+        if (current_customer[k] == std::get<0>(counter_variable[i]))
+        {
+            index = i;
+            find_customer = std::get<0>(counter_variable[i]);
+            break;
+        }
     }
+    
 
-    std::get<5>(counter_variable[find_customer]) = t;
+    std::get<5>(counter_variable[index]) = t;
 
     int customer_id = current_customer[k];
 
@@ -334,10 +348,13 @@ int station::departure_updates(float t)
         server_status[k] = 1;
         td[k] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
 
-        for (auto &x : counter_variable)
+        for(int i=counter_variable.size()-1;i>=0;i--)
         {
-            if (current_customer[k] == std::get<0>(x))
-                std::get<4>(x) = t;
+            if (current_customer[k] == std::get<0>(counter_variable[i]))
+            {
+                std::get<4>(counter_variable[i]) = t;
+                break;
+            }
         }
     }
     else if (current_queue.empty() && server_status[k] != 2)
@@ -565,6 +582,8 @@ void station::write_to_csv(std::string file_name)
     data << "Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,\n";
     for (auto &x : counter_variable)
     {
+        if(std::get<5>(x) == 0)
+            break;
         data << std::get<0>(x) << ","
              << std::get<1>(x) << ","
              << std::get<2>(x) << ","
@@ -610,6 +629,58 @@ float station::minimum_residual_time(float t)
 std::tuple<int,int,int> station::access_system_state(float t)
 {
     return std::make_tuple(  n, current_queue.size(), C(T(t)) );
+}
+void station::initialize_CSV(std::string file_name)
+{
+    std::ofstream data;
+    data.open( file_name + ".csv", std::ofstream::app);
+    data << "Customer,Time of arrival,Number of people at arrival,Number of people currently in queue at arrival,Which 10 min interval in day,Which day in week,Time of start of service,Departure time,Wait time,\n";
+    data.close();
+}
+
+void station::dump_counter_variable_memory(std::string file_name)
+{
+    std::ofstream data;
+    data.open( file_name + ".csv", std::ofstream::app);
+
+    for (auto &x : counter_variable)
+    {
+        if(std::get<5>(x) == 0)
+            break;
+        data << std::get<0>(x) << ","
+             << std::get<1>(x) << ","
+             << std::get<2>(x) << ","
+             << std::get<3>(x) << ","
+             << ((int(std::get<1>(x))) % 1440) / 10 << ','
+             << int(std::get<1>(x) / 1440) % 7 << ','
+             << std::get<4>(x) << ","
+             << std::get<5>(x) << ","
+             << (std::get<4>(x) - std::get<1>(x)) << ","
+             << "\n";
+    }
+    data.close();
+    std::vector< std::tuple<int,float,int,int,float,float> > counter_variable_temp;
+    counter_variable_temp.assign(0,{});
+    for(int i = 0;i<this->counter_variable.size();i++)
+    {
+        if(std::get<5>(this->counter_variable[i])==0)
+            counter_variable_temp.push_back(this->counter_variable[i]);
+    }
+    this->counter_variable.clear();
+    this->counter_variable = counter_variable_temp;
+}
+void station::dump_counter_variable_memory()
+{
+    std::vector< std::tuple<int,float,int,int,float,float> > counter_variable_temp;
+    counter_variable_temp.assign(0,{});
+    for(int i = 0;i<this->counter_variable.size();i++)
+    {
+        if(std::get<5>(this->counter_variable[i])==0)
+            counter_variable_temp.push_back(this->counter_variable[i]);
+        
+    }
+    this->counter_variable.clear();
+    this->counter_variable = counter_variable_temp;
 }
 
 /// @brief Reads data from a CSV file.

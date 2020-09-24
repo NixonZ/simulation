@@ -107,7 +107,8 @@ void simulate_stations(std::vector<station> station_list)
             std::cout<<"Writing to CSV\n";
             temp.dump_counter_variable_memory("ED-Simulation");
         }
-        std::cout<<discrete_events<<endl;
+        std::cout<<discrete_events <<'\n';
+        t = T(t);
     }
     // std::cout<<"Writing to CSV\n";
     // temp.write_to_csv("ED-Simulation");
@@ -117,39 +118,39 @@ int main()
 {
     srand((unsigned)time(NULL));
 
-    std::vector<float> lognormal_values_5_3 = read_csv("lognormal.csv",2);
-    std::vector<float> lognormal_values_10_2 = read_csv("lognormal.csv",3);
+    std::vector<float> lognormal_values_5_2 = read_csv("lognormal.csv",4);
+    std::vector<float> lognormal_values_12_2 = read_csv("lognormal.csv",3);
     
     std::vector<station> station_list ;
 
     station_list.push_back( station( 9, C_nurses,
-     [lognormal_values_5_3](float t) -> float
+     [lognormal_values_5_2](float t) -> float
      { 
         float U = random; 
-        int index = (int)(U*lognormal_values_5_3.size());
+        int index = (int)(U*lognormal_values_5_2.size());
         try
         {
-            return lognormal_values_5_3[index];
+            return lognormal_values_5_2[index];
         }
         catch(const std::exception& e)
         {
-            return lognormal_values_5_3[index-1];
+            return lognormal_values_5_2[index-1];
         } 
      }
     ));
 
     station_list.push_back( station( 5, C_doctors, 
-     [lognormal_values_10_2](float t) -> float
+     [lognormal_values_12_2](float t) -> float
      {
         float U = random; 
-        int index = (int)(U*lognormal_values_10_2.size());
+        int index = (int)(U*lognormal_values_12_2.size());
         try
         {
-            return lognormal_values_10_2[index];
+            return lognormal_values_12_2[index];
         }
         catch(const std::exception& e)
         {
-            return lognormal_values_10_2[index-1];
+            return lognormal_values_12_2[index-1];
         }
      }
     ));
