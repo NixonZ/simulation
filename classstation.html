@@ -121,6 +121,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0096b556154e36e1b457f3f08be364af"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstation.html#a0096b556154e36e1b457f3f08be364af">minimum_residual_time</a> (float t)</td></tr>
 <tr class="memdesc:a0096b556154e36e1b457f3f08be364af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives the minimum residual time i.e. time left for next departure.  <a href="#a0096b556154e36e1b457f3f08be364af">More...</a><br /></td></tr>
 <tr class="separator:a0096b556154e36e1b457f3f08be364af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a958c6cca616ad7d8702cfb77b18e8d42"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; int, int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstation.html#a958c6cca616ad7d8702cfb77b18e8d42">access_system_state</a> (float t)</td></tr>
+<tr class="separator:a958c6cca616ad7d8702cfb77b18e8d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd096de783893eb0d3aa09bba761efdd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstation.html#afd096de783893eb0d3aa09bba761efdd">initialize_CSV</a> (std::string file_name)</td></tr>
+<tr class="separator:afd096de783893eb0d3aa09bba761efdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a908ef4975b3196837e75a83712fd0c50"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstation.html#a908ef4975b3196837e75a83712fd0c50">dump_counter_variable_memory</a> (std::string file_name)</td></tr>
+<tr class="separator:a908ef4975b3196837e75a83712fd0c50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67028e64e11eeecb552def8625f1801c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstation.html#a67028e64e11eeecb552def8625f1801c">dump_counter_variable_memory</a> ()</td></tr>
+<tr class="separator:a67028e64e11eeecb552def8625f1801c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
 Private Types</h2></td></tr>
@@ -421,6 +429,25 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a958c6cca616ad7d8702cfb77b18e8d42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a958c6cca616ad7d8702cfb77b18e8d42">&#9670;&nbsp;</a></span>access_system_state()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::tuple&lt; int, int, int &gt; station::access_system_state </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>t</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Server update function </p>
+
+</div>
+</div>
 <a id="a307b57744a7c50c3c07b0b1a849d959b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a307b57744a7c50c3c07b0b1a849d959b">&#9670;&nbsp;</a></span>add_customer_to_station()</h2>
 
@@ -495,6 +522,41 @@ Private Attributes</h2></td></tr>
 <p>Example: </p><div class="fragment"><div class="line"><a class="code" href="classstation.html">station</a> temp; <span class="comment">//suitably defined</span></div><div class="line"><span class="keywordtype">int</span> discrete_events = 0;</div><div class="line"><span class="keywordtype">int</span> arriving_customer = 0;</div><div class="line"><span class="keywordtype">float</span> t = 0;</div><div class="line"><span class="keywordtype">float</span> ta = Ts_generator(t);</div><div class="line"><span class="keywordflow">while</span> (discrete_events &lt; 50)</div><div class="line">{</div><div class="line">    t = std::min(temp.<a class="code" href="classstation.html#add2c6cc94e0b49ebb614f37d27225cbe">find_min_td</a>(), ta); <span class="comment">//station::find_mid_td</span></div><div class="line">    temp.<a class="code" href="classstation.html#ac217f300ea83de9d5c8a0f3a5ebaf496">server_updates</a>(t);</div><div class="line">    <span class="keywordflow">if</span> (t == ta)</div><div class="line">    {</div><div class="line">        <span class="comment">//arrival happening</span></div><div class="line">        temp.<a class="code" href="classstation.html#a307b57744a7c50c3c07b0b1a849d959b">add_customer_to_station</a>(t, arriving_customer);</div><div class="line">        arriving_customer++;</div><div class="line">        ta = Ts_generator(t);</div><div class="line">    }</div><div class="line">    <span class="keywordflow">else</span></div><div class="line">        temp.<a class="code" href="classstation.html#ada228eb70fe1057c9c2325cc6dba081d">departure_updates</a>(t);</div><div class="line">    temp.<a class="code" href="classstation.html#a2da0f51b5001a35476faefa192c17290">print_station_status</a>(t);</div><div class="line">    discrete_events++;</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
+<a id="a908ef4975b3196837e75a83712fd0c50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a908ef4975b3196837e75a83712fd0c50">&#9670;&nbsp;</a></span>dump_counter_variable_memory() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void station::dump_counter_variable_memory </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>file_name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a67028e64e11eeecb552def8625f1801c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67028e64e11eeecb552def8625f1801c">&#9670;&nbsp;</a></span>dump_counter_variable_memory() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void station::dump_counter_variable_memory </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a51807da4ff713d53df05b11be3418db6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a51807da4ff713d53df05b11be3418db6">&#9670;&nbsp;</a></span>find_min_k()</h2>
 
@@ -511,7 +573,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Finds the server index which has the minimal departure time. </p>
-<p>Finds the server index with departure time with a simple loop. Completed in O(mxN)</p>
+<p>Finds the server index with departure time with a simple loop. Completed in O(mxN).</p>
 <dl class="section return"><dt>Returns</dt><dd>Index of the server with minimum departure time. </dd></dl>
 
 </div>
@@ -573,6 +635,24 @@ Private Attributes</h2></td></tr>
 <p>Gives back the <a class="el" href="classstation.html#a8ec26b9f364cb20e8b26a9163402049e">station::counter_variable</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classstation.html#a8ec26b9f364cb20e8b26a9163402049e">station::counter_variable</a>.</dd></dl>
 <p>Example: </p><div class="fragment"><div class="line"><span class="keywordflow">for</span>(<span class="keyword">auto</span>&amp;x: MM1.get_counter_variable())</div><div class="line">        {</div><div class="line">            <span class="keywordflow">if</span>( std::get&lt;0&gt;(x) == customer_departing )</div><div class="line">                X = std::get&lt;4&gt;(x) - std::get&lt;1&gt;(x);</div><div class="line">        }</div></div><!-- fragment --> 
+</div>
+</div>
+<a id="afd096de783893eb0d3aa09bba761efdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd096de783893eb0d3aa09bba761efdd">&#9670;&nbsp;</a></span>initialize_CSV()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void station::initialize_CSV </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>file_name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
 </div>
 </div>
 <a id="ae74fbc5a0e04f505fcbabebbb2eeac3d"></a>
