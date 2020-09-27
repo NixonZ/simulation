@@ -1,4 +1,5 @@
 #include "components/tandem.h"
+#include "components/queue_graph.h"
 #define random (float)rand() / RAND_MAX;
 #define PI acos(-1) 
 #define square(x) x*x
@@ -151,6 +152,45 @@ void simulate_stations(std::vector<station> station_list)
     temp.write_to_csv("tandem");
 }
 
+void simulate_graph(graph station_graph)
+{
+    float least_dep_time = 0;
+    int least_station_index = 0;
+
+	std::tie(std::ignore,least_dep_time) = station_graph.find_least_dep_time();
+
+    int discrete_events = 0;
+    float t = 0;
+    int arriving_customer = 0;
+    float ta = Ts_generator(t);
+
+    // temp.print_system_status(T(t));
+    // temp.logger(t);
+
+    while(discrete_events<5000)
+    {
+        std::tie(least_station_index, least_dep_time) = station_graph.find_least_dep_time();
+
+        t = std::min(least_dep_time, ta);
+
+        station_graph.server_updates(t);
+
+        if(t == ta)
+        {
+            station_graph.add_customer_to_graph(t,arriving_customer);
+            arriving_customer++;
+            ta = Ts_generator(t);
+        }
+        else
+            station_graph.departure_updates(least_station_index,t);
+
+        discrete_events++;
+        std::cout<<discrete_events<<endl;
+    }
+    std::cout<<"Writing to CSV";
+    station_graph.write_to_csv("graph");
+}
+
 void simulate_station(station temp)
 {
     // temp.print_station_status(0);
@@ -182,34 +222,87 @@ int main()
 {
     srand((unsigned)time(NULL));
 
-    // std:: vector<station>station_list ;
-    // station_list.push_back( station(2,2,10) );
-    // station_list.push_back( station( 9, C_nurses , [](float t) -> float { return Normals(10, 2); } ) );
-    // station_list.push_back( station( 5, C_doctors , [](float t) -> float { return Normals(30,10); }  ) );
+    std::vector<float> lognormal_values_5_2 = read_csv("lognormal.csv",4);
+    std::vector<float> lognormal_values_12_2 = read_csv("lognormal.csv",3);
 
-    // simulate_stations(station_list) ;
+    std::vector<station> station_list;
 
-
-    // Simulation for Single server 
-    // station temp(5, [](float t)->int { return 5; } , [](float t)->float { return Normals(30,10); } ); //or
-    // station temp(5,C,DepartureTimes,0,0);
-
-    std::vector<float> lognormal_values = read_csv("lognormal.csv",1);
-
-    station temp(1,1,
-    [lognormal_values](float t)-> float 
+    // 0
+    station_list.push_back(station(1,1, 
+    [lognormal_values_12_2](float t)-> float 
     { 
         float U = random; 
-        int index = (int)(U*lognormal_values.size());
+        int index = (int)(U*lognormal_values_12_2.size());
         try
         {
-            return lognormal_values[index];
+            return lognormal_values_12_2[index];
         }
         catch(const std::exception& e)
         {
-            return lognormal_values[index-1];
+            return lognormal_values_12_2[index-1];
         }
-    });
-    simulate_station(temp);
+    }));
+
+    //1
+    station_list.push_back(station(2,2,
+    [lognormal_values_12_2](float t)-> float 
+    { 
+        float U = random; 
+        int index = (int)(U*lognormal_values_12_2.size());
+        try
+        {
+            return lognormal_values_12_2[index];
+        }
+        catch(const std::exception& e)
+        {
+            return lognormal_values_12_2[index-1];
+        }
+    }));
+
+    //2 
+    station_list.push_back(station(1,1,
+    [lognormal_values_12_2](float t)-> float 
+    { 
+        float U = random; 
+        int index = (int)(U*lognormal_values_12_2.size());
+        try
+        {
+            return lognormal_values_12_2[index];
+        }
+        catch(const std::exception& e)
+        {
+            return lognormal_values_12_2[index-1];
+        }
+    }));
+
+    //3
+    station_list.push_back(station(5,5,DepartureTimes));
+
+    //4
+    station_list.push_back(station(4,4,
+        [lognormal_values_5_2](float t)-> float 
+        { 
+            float U = random; 
+            int index = (int)(U*lognormal_values_5_2.size());
+            try
+            {
+                return lognormal_values_5_2[index];
+            }
+            catch(const std::exception& e)
+            {
+                return lognormal_values_5_2[index-1];
+            }
+        }));
+
+    std::vector< std::vector< std::pair<int,int> > > network = {
+        {{1,1}},
+        {{2,1},{3,1}},
+        {{4,1}},
+        {{4,1}},
+        {}
+    };
+    // station_list.push_back(temp2);
+    graph station_graph(0,0,network,station_list);
+    simulate_graph(station_graph);
     return 0 ;
 }
