@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['get_5fcounter_5fvariable',['get_counter_variable',['../classstation.html#a8b99f6d884291fc2c036fb1bf294e5b2',1,'station']]],
-  ['graph',['graph',['../classgraph.html#a1cc7034fbd17c745d901cf7b8e5984f4',1,'graph']]]
+  ['initialize_5fcsv',['initialize_CSV',['../classstation.html#afd096de783893eb0d3aa09bba761efdd',1,'station::initialize_CSV()'],['../classtandem.html#adec1fb9a4c8a3dbc79534e43f8b727cd',1,'tandem::initialize_CSV()']]]
 ];

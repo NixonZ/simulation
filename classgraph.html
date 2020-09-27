@@ -76,18 +76,16 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1cc7034fbd17c745d901cf7b8e5984f4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#a1cc7034fbd17c745d901cf7b8e5984f4">graph</a> (int init_N, int init_max_queue_len, std::vector&lt; std::vector&lt; std::pair&lt; int, int &gt;&gt;&gt; init_network, std::vector&lt; <a class="el" href="classstation.html">station</a> &gt; temp)</td></tr>
 <tr class="separator:a1cc7034fbd17c745d901cf7b8e5984f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f8a19a6d9b089636fc21b0198dfefbe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#a2f8a19a6d9b089636fc21b0198dfefbe">calculate_distance</a> ()</td></tr>
-<tr class="separator:a2f8a19a6d9b089636fc21b0198dfefbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95bfffeb4e1e28699807b3918851bd52"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#a95bfffeb4e1e28699807b3918851bd52">min_queue_len</a> (int v=0)</td></tr>
-<tr class="separator:a95bfffeb4e1e28699807b3918851bd52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12f16f98d12345e1dfe33a5d804c9c63"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; int, float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#a12f16f98d12345e1dfe33a5d804c9c63">find_least_dep_time</a> ()</td></tr>
 <tr class="separator:a12f16f98d12345e1dfe33a5d804c9c63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18f2bd039d9185715bb90bb2f970e39f"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#a18f2bd039d9185715bb90bb2f970e39f">dfs2</a> (int v=0)</td></tr>
-<tr class="separator:a18f2bd039d9185715bb90bb2f970e39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53ec12d60ff642cfd3b869c4a30ca3b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#a53ec12d60ff642cfd3b869c4a30ca3b8">add_customer_to_graph</a> (float t, int customer_id)</td></tr>
 <tr class="separator:a53ec12d60ff642cfd3b869c4a30ca3b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae12d237d99aa162688f80631d955fcf1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#ae12d237d99aa162688f80631d955fcf1">departure_updates</a> (int station_index, float t)</td></tr>
 <tr class="separator:ae12d237d99aa162688f80631d955fcf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7ebafe5e28ce6eba48df3403a72a478"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#ad7ebafe5e28ce6eba48df3403a72a478">server_updates</a> (float t)</td></tr>
+<tr class="separator:ad7ebafe5e28ce6eba48df3403a72a478"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada343e3cb86a603dc8a76766b6794410"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#ada343e3cb86a603dc8a76766b6794410">write_to_csv</a> (std::string file_name)</td></tr>
+<tr class="separator:ada343e3cb86a603dc8a76766b6794410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -101,10 +99,6 @@ Private Attributes</h2></td></tr>
 <tr class="separator:ac018a8e113a9c476f33bcd70dd434f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adef1d3c630e8e255f59676c6fc75ad7a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classstation.html">station</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#adef1d3c630e8e255f59676c6fc75ad7a">station_list</a></td></tr>
 <tr class="separator:adef1d3c630e8e255f59676c6fc75ad7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2fe9681e21d27b328f400b9bf4badd6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#ad2fe9681e21d27b328f400b9bf4badd6">visited</a></td></tr>
-<tr class="separator:ad2fe9681e21d27b328f400b9bf4badd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab86b218288f9fadf1c8d14b6e6cae74e"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#ab86b218288f9fadf1c8d14b6e6cae74e">distance_from_exit</a></td></tr>
-<tr class="separator:ab86b218288f9fadf1c8d14b6e6cae74e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc9a33826f975e11956fb8d7eb892a5d"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::tuple&lt; int, float, int, float, float &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraph.html#acc9a33826f975e11956fb8d7eb892a5d">system_counter_variable</a></td></tr>
 <tr class="separator:acc9a33826f975e11956fb8d7eb892a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -178,23 +172,6 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a2f8a19a6d9b089636fc21b0198dfefbe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f8a19a6d9b089636fc21b0198dfefbe">&#9670;&nbsp;</a></span>calculate_distance()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void graph::calculate_distance </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="ae12d237d99aa162688f80631d955fcf1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae12d237d99aa162688f80631d955fcf1">&#9670;&nbsp;</a></span>departure_updates()</h2>
 
@@ -223,24 +200,6 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a18f2bd039d9185715bb90bb2f970e39f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a18f2bd039d9185715bb90bb2f970e39f">&#9670;&nbsp;</a></span>dfs2()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt; int &gt; graph::dfs2 </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>v</em> = <code>0</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a12f16f98d12345e1dfe33a5d804c9c63"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a12f16f98d12345e1dfe33a5d804c9c63">&#9670;&nbsp;</a></span>find_least_dep_time()</h2>
 
@@ -258,17 +217,35 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a95bfffeb4e1e28699807b3918851bd52"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a95bfffeb4e1e28699807b3918851bd52">&#9670;&nbsp;</a></span>min_queue_len()</h2>
+<a id="ad7ebafe5e28ce6eba48df3403a72a478"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7ebafe5e28ce6eba48df3403a72a478">&#9670;&nbsp;</a></span>server_updates()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void graph::min_queue_len </td>
+          <td class="memname">void graph::server_updates </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>v</em> = <code>0</code></td><td>)</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>t</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ada343e3cb86a603dc8a76766b6794410"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada343e3cb86a603dc8a76766b6794410">&#9670;&nbsp;</a></span>write_to_csv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void graph::write_to_csv </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>file_name</em> = <code>&quot;data_system&quot;</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -277,28 +254,6 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="ab86b218288f9fadf1c8d14b6e6cae74e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab86b218288f9fadf1c8d14b6e6cae74e">&#9670;&nbsp;</a></span>distance_from_exit</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;int&gt; graph::distance_from_exit</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a718bc29113d85c5f10afcc4f71bd48c5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a718bc29113d85c5f10afcc4f71bd48c5">&#9670;&nbsp;</a></span>max_queue_len</h2>
 
@@ -420,28 +375,6 @@ Private Attributes</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">std::vector&lt;std::tuple&lt;int, float, int, float, float&gt; &gt; graph::system_counter_variable</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ad2fe9681e21d27b328f400b9bf4badd6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad2fe9681e21d27b328f400b9bf4badd6">&#9670;&nbsp;</a></span>visited</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;bool&gt; graph::visited</td>
         </tr>
       </table>
   </td>
