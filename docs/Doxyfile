@@ -112,7 +112,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ./components/ ./docs/mainpage.md ./docs/Single_Server_Queue.md
+INPUT                  = ./components/ ./docs/mainpage.md ./docs/Single_Server_Queue.md ./docs/Graph_Queue.md ./docs/graph.png
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \

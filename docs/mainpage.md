@@ -12,6 +12,7 @@ Please visit our [examples](https://github.com/NixonZ/simulation/tree/master/exa
 Following are few examples exaplained briefly.
 
 1. [Single Server Queue Simulation](md_docs_Single_Server_Queue.html)
+2. [Graph of Queue Simulation](md_docs_Graph_Queue.html)
 
 ***
 
