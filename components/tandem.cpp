@@ -7,7 +7,7 @@ tandem::tandem(std::vector<station> temp)
     N = 0;
 }
 
-void tandem::add_customer_to_system(float t, int arriving_customer)
+void tandem::add_customer_to_system(float t, customer arriving_customer)
 {
     N++;
     station_list[0].add_customer_to_station(t, arriving_customer);
@@ -45,7 +45,7 @@ void tandem::departure_updates(int station_index, float t)
         // std::cout << "---------------------------------> Departure at last station" << endl;
         N--;
 
-        int departing_customer = station_list[station_index].station::departure_updates(t);
+        customer departing_customer = station_list[station_index].station::departure_updates(t);
 
         float service_time = 0;
 
@@ -109,8 +109,8 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
 {
     std::ofstream data;
 
-    data.open( tandem_name + ".csv", std::ofstream::out);
-    data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
+    data.open( tandem_name + ".csv", std::ofstream::out|std::ofstream::trunc);
+    data << "Customer ID,Priority Level,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
     for(int i=0;i<this->number_of_station;i++)
     {
         data << "Number of people at station " <<i <<" at arrival,";
@@ -119,7 +119,7 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
     }
     data <<"Time of start of service,Departure time,Wait time,\n";
 
-    int last_customer_in_last_station = 0;
+    customer last_customer_in_last_station = {0,0};
 
     for (int i = station_list[number_of_station - 1].get_counter_variable().size()-1;i>=0;i++)
     {
@@ -134,7 +134,8 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
     {
         if(std::get<5>(x) == 0)
             break;
-        data << std::get<0>(x) << ","
+        data << std::get<0>(x)[1] <<","
+             << std::get<0>(x)[0] <<","
              << std::get<1>(x) << ","
              << std::get<2>(x) << ","
              << ((int(std::get<1>(x))) % 1440) / 10 << ','
@@ -162,8 +163,8 @@ void tandem::initialize_CSV(std::string tandem_name = "data_system")
 {
     std::ofstream data;
 
-    data.open( tandem_name + ".csv", std::ofstream::out);
-    data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
+    data.open( tandem_name + ".csv", std::ofstream::out|std::ofstream::trunc);
+    data << "Customer ID,Priority Level,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
     for(int i=0;i<this->number_of_station;i++)
     {
         data << "Number of people at station " <<i <<" at arrival,";
@@ -181,10 +182,10 @@ void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system
     data.open( tandem_name + ".csv", std::ofstream::app);
     
 
-    int last_customer_in_last_station = 0;
+    customer last_customer_in_last_station = {0,0};
     for (auto &x : station_list[number_of_station - 1].get_counter_variable())
     {
-        if (std::get<0>(x) > last_customer_in_last_station)
+        if (std::get<0>(x)[0] > last_customer_in_last_station[0])
             last_customer_in_last_station = std::get<0>(x);
     }
 
@@ -192,7 +193,8 @@ void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system
     {
         if(std::get<5>(x) == 0)
             break;
-        data << std::get<0>(x) << ","
+        data << std::get<0>(x)[1] <<","
+             << std::get<0>(x)[0] <<","
              << std::get<1>(x) << ","
              << std::get<2>(x) << ","
              << ((int(std::get<1>(x))) % 1440) / 10 << ','
@@ -210,11 +212,11 @@ void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system
              << std::get<5>(x) << ","
              << (std::get<4>(x) - std::get<1>(x)) << ","
              << "\n";
-        if (std::get<0>(x) == last_customer_in_last_station)
+        if (std::get<0>(x)[0] == last_customer_in_last_station[0])
             break;
     }
     
-    std::vector<std::tuple<int, float, int,std::vector<std::tuple<int,int,int>>, float, float>> system_counter_variable_temp;
+    std::vector<tandem_data> system_counter_variable_temp;
     system_counter_variable_temp.assign(0,{});
     for(int i = 0;i<this->system_counter_variable.size();i++)
     {
@@ -230,4 +232,10 @@ void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system
     }
 
     data.close();
+}
+
+int tandem::num_classes()
+{
+    return this->station_list[0].num_classes();
+
 }

@@ -46,7 +46,7 @@ void graph::server_updates(float t)
     }
 }
 
-void graph::add_customer_to_graph(float t,int arriving_customer)
+void graph::add_customer_to_graph(float t,customer arriving_customer)
 {
     N++;
     station_list[0].add_customer_to_station(t, arriving_customer);
@@ -76,7 +76,7 @@ void graph::departure_updates(int station_index, float t)
         // std::cout << "---------------------------------> Departure at last station" << endl;
         N--;
 
-        int departing_customer = station_list[station_index].station::departure_updates(t);
+        customer departing_customer = station_list[station_index].station::departure_updates(t);
 
         float service_time = 0;
 
@@ -102,7 +102,7 @@ void graph::departure_updates(int station_index, float t)
     }
     else
     {
-        int departing_customer = station_list[station_index].station::departure_updates(t);
+        customer departing_customer = station_list[station_index].station::departure_updates(t);
         // do departure updates for station_index
         // arrival updates for one the connected stations.
     
@@ -116,8 +116,8 @@ void graph::write_to_csv(std::string file_name = "data_system")
 {
     std::ofstream data;
 
-    data.open( file_name + ".csv", std::ofstream::out);
-    data << "Customer,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
+    data.open( file_name + ".csv", std::ofstream::out|std::ofstream::trunc);
+    data << "Customer ID,Priority Level,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
     // for(int i=0;i<this->station_list.size();i++)
     // {
     //     data << "Number of people at station " <<i <<" at arrival,";
@@ -126,7 +126,7 @@ void graph::write_to_csv(std::string file_name = "data_system")
     // }
     data <<"Time of start of service,Departure time,Wait time,\n";
 
-    int last_customer_in_last_station = 0;
+    customer last_customer_in_last_station = {0,0};
 
     for (int i = station_list[station_list.size() - 1].get_counter_variable().size()-1;i>=0;i++)
     {
@@ -141,8 +141,9 @@ void graph::write_to_csv(std::string file_name = "data_system")
     {
         if(std::get<4>(x) == 0)
             break;
-        data << std::get<0>(x) << ","
-             << std::get<1>(x) << ","
+        data << std::get<0>(x)[1] <<","
+             << std::get<0>(x)[0] <<","
+             << std::get<1>(x) <<","
              << std::get<2>(x) << ","
              << ((int(std::get<1>(x))) % 1440) / 10 << ','
              << int(std::get<1>(x) / 1440) % 7 << ',';
@@ -163,4 +164,16 @@ void graph::write_to_csv(std::string file_name = "data_system")
             break;
     }
     data.close();
+}
+
+void graph::logger(float t)
+{
+    int l = 0;
+    for (auto &x : station_list)
+        x.logger(l++, t);
+}
+
+int graph::num_classes()
+{
+    return station_list[0].num_classes();
 }

@@ -5,9 +5,9 @@ class tandem
 {
     std::vector<station> station_list;
     int number_of_station;
-    std::vector<std::tuple<int, float, int,std::vector<std::tuple<int,int,int>>, float, float>> system_counter_variable;
+    std::vector<tandem_data> system_counter_variable;
     /* 
-    0 - Customer id
+    0 - Customer
     1 - Time of arrival
     2 - Number of people in system at arrival
     3 - Vector containing information about all the stations
@@ -20,12 +20,13 @@ public:
     tandem(std::vector<station> temp);
     std::tuple<int, float> find_least_dep_time();
     void print_system_status(float t);
-    void add_customer_to_system(float t, int arriving_customer);
+    void add_customer_to_system(float t, customer arriving_customer);
     void departure_updates(int station_index, float t);
     void server_updates(float t);
     void write_to_csv(std::string tandem_name);
     void logger(float t);
     void initialize_CSV(std::string file_name);
     void dump_counter_variable_memory(std::string file_name);
+    int num_classes();
 };
 #endif
