@@ -1,24 +1,78 @@
 #include "tandem.h"
 
-tandem::tandem(std::vector<station> temp)
-{
-    station_list = temp;
-    number_of_station = temp.size();
-    N = 0;
-}
-
-void tandem::add_customer_to_system(float t, customer arriving_customer)
+void tandem::add_customer_to_system(float t, customer curr_customer, bool keep_virtual = false, event_type_list arrival_processes = { [](float t)-> float{return 0;} },std::vector<float> ta = {0.0})
 {
     N++;
-    station_list[0].add_customer_to_station(t, arriving_customer);
+
+    float virtual_wait_time = -1;
+    // Generate virtual Waiting time by running a copy of the simulation
+    if(keep_virtual)
+    {
+        float least_dep_time = 0;
+        int least_station_index = 0;
+        tandem virtual_wait( *this );
+        int t_ = t;
+        int arriving_customer = curr_customer[1];
+
+        virtual_wait.add_customer_to_system(t_,curr_customer,false);
+        arriving_customer++;
+        ta[curr_customer[0]] = t_ + arrival_processes[curr_customer[0]](t_) ;
+
+        customer dept_cust;
+
+        int priority;
+        
+        while (true)
+        {
+            std::tie(least_station_index, least_dep_time) = virtual_wait.find_least_dep_time();
+            t_ = std::min(least_dep_time, *std::min_element(ta.begin(),ta.end()) );
+
+            virtual_wait.server_updates(t_);
+
+            if (t_ == *std::min_element(ta.begin(),ta.end()))
+            {
+                //arrival happening
+                priority = std::distance(ta.begin(), std::min_element(ta.begin(),ta.end()) );
+                virtual_wait.add_customer_to_system(t_, {priority,arriving_customer},false);
+                arriving_customer++;
+                ta[priority] = t_ + arrival_processes[priority](t_) ;
+            }
+            else if(least_station_index == number_of_station-1)
+            {
+                dept_cust = virtual_wait.departure_updates(least_station_index,t);
+                if(dept_cust == curr_customer)
+                    break;
+            }
+            else
+                virtual_wait.departure_updates(least_station_index,t);
+        }
+        virtual_wait_time = t_ - t;
+    }
+    // Comparision of patience times and decide whether to add customer
+    float patience_time = PatienceTimes[curr_customer[0]](t);
+
+    bool add = (patience_time>virtual_wait_time);
+
     std::vector<std::tuple<int,int,int>> temp;
     for(auto& station:station_list)
     {
         temp.push_back(station.access_system_state(t));
     }
-    system_counter_variable.push_back(
-        std::make_tuple(arriving_customer, t, N,temp, 0, 0)
+
+    if(add)
+    {
+        station_list[0].add_customer_to_station(t, curr_customer,false);
+        system_counter_variable.push_back(
+            std::make_tuple(curr_customer, t, N,temp, 0, 0)
         );
+    }
+    else
+    {
+        system_counter_variable.push_back(
+            std::make_tuple(curr_customer, t, N,temp, -1, -1)
+        );
+    }
+    
 }
 
 //O(mxN*numberofstation)
@@ -38,7 +92,7 @@ std::tuple<int, float> tandem::find_least_dep_time()
     return std::make_tuple(station_index, least_dep_time);
 }
 
-void tandem::departure_updates(int station_index, float t)
+customer tandem::departure_updates(int station_index, float t)
 {
     if (station_index == station_list.size() - 1)
     {
@@ -68,13 +122,14 @@ void tandem::departure_updates(int station_index, float t)
                 break;
             }
         }
+        return departing_customer;
         // do only departure updates for last station
     }
     else
     {
         // std::cout << "---------------------------------> Departure at station :" << station_index << endl;
         station_list[station_index + 1].add_customer_to_station(t, station_list[station_index].departure_updates(t));
-
+        return;
         // do departure updates for station_index
         // do arrival updates for station_index+1
     }
@@ -119,21 +174,10 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
     }
     data <<"Time of start of service,Departure time,Wait time,\n";
 
-    customer last_customer_in_last_station = {0,0};
-
-    for (int i = station_list[number_of_station - 1].get_counter_variable().size()-1;i>=0;i++)
-    {
-        if (std::get<5>(station_list[number_of_station - 1].get_counter_variable()[i]) > 0 )
-        {
-            last_customer_in_last_station = std::get<0>(station_list[number_of_station - 1].get_counter_variable()[i]);
-            break;
-        }
-    }
-
     for (auto &x : system_counter_variable)
     {
         if(std::get<5>(x) == 0)
-            break;
+            continue;
         data << std::get<0>(x)[1] <<","
              << std::get<0>(x)[0] <<","
              << std::get<1>(x) << ","
@@ -153,8 +197,6 @@ void tandem::write_to_csv(std::string tandem_name = "data_system")
              << std::get<5>(x) << ","
              << (std::get<4>(x) - std::get<1>(x)) << ","
              << "\n";
-        if (std::get<0>(x) == last_customer_in_last_station)
-            break;
     }
     data.close();
 }
@@ -181,18 +223,10 @@ void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system
 
     data.open( tandem_name + ".csv", std::ofstream::app);
     
-
-    customer last_customer_in_last_station = {0,0};
-    for (auto &x : station_list[number_of_station - 1].get_counter_variable())
-    {
-        if (std::get<0>(x)[0] > last_customer_in_last_station[0])
-            last_customer_in_last_station = std::get<0>(x);
-    }
-
     for (auto &x : system_counter_variable)
     {
         if(std::get<5>(x) == 0)
-            break;
+            continue;
         data << std::get<0>(x)[1] <<","
              << std::get<0>(x)[0] <<","
              << std::get<1>(x) << ","
@@ -212,8 +246,6 @@ void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system
              << std::get<5>(x) << ","
              << (std::get<4>(x) - std::get<1>(x)) << ","
              << "\n";
-        if (std::get<0>(x)[0] == last_customer_in_last_station[0])
-            break;
     }
     
     std::vector<tandem_data> system_counter_variable_temp;

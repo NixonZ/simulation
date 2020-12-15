@@ -12,7 +12,7 @@ class graph
     std::vector<station> station_list; // 0 : Entry to system , -1 : Exit to station
     std::vector<graph_data> system_counter_variable;
     /* 
-    0 - Customer id
+    0 - Customer
     1 - Time of arrival
     2 - Number of people in system at arrival
     3 - Service times at last station
@@ -26,6 +26,8 @@ public:
     void departure_updates(int station_index, float t);
     void server_updates(float t);
     void write_to_csv(std::string file_name);
+    void initialize_CSV(std::string file_name);
+    void dump_counter_variable_memory(std::string file_name);
     void logger(float t);
     int num_classes();
 };

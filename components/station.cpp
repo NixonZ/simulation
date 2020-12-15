@@ -94,7 +94,7 @@ void station::server_updates(float t)
                         current_queue.erase(current_queue.begin()) ;
 
                         server_status[i] = 1;
-                        td[i] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
+                        td[i] = t + DepartureTimes[current_customer[i][0]]((t - int(t)) + int(t) % 1440);
                     }
                     else
                     {
@@ -128,7 +128,7 @@ void station::server_updates(float t)
 
                         current_queue.erase(current_queue.begin()) ;
                         server_status[i] = 1;
-                        td[i] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
+                        td[i] = t + DepartureTimes[current_customer[i][0]]((t - int(t)) + int(t) % 1440);
                     }
                     else
                     {
@@ -202,12 +202,15 @@ void station::server_updates(float t)
 
 /// @brief Add a single customer to the front of the system.
 ///  @param t  The time variable.
-///  @param customer_id id of the customer which is to be added. Maintain a counter for the customers.\n
+///  @param curr_customer Prioirty and ID of the customer which is to be added. Maintain a counter for the customers.\n
 ///                     Call this function whenever the time variable reaches an arrival time.
+///  @param arrival_process A list of functions which generate arrival times for each prioirty.
+///  @param ta The next arrival times for each prioirity level.
+///  @param keep_virtual Whether to calculate virual Waiting Time or not. Default false. Keep True when Patience Times are used.
 ///  @details
 ///  Increases the number of customer present in the system. Creates a new entry in station::counter_variable for the\n
 ///  incoming customer. The customer is sent to the first empty server or in case no empty server is found,\n
-///  to the back of the queue. (station::current_queue).
+///  to the back of the queue. (station::current_queue). Can Calculate the virtual times if patience times are given and customer abandonment can be implemented.
 ///
 ///  @note     Must be called when time variable reahes next time of arrival.
 ///  @warning  Assumes customer id given are sequential integers.
@@ -237,29 +240,81 @@ void station::server_updates(float t)
 ///         discrete_events++;
 ///     }
 ///  @endcode
-void station::add_customer_to_station(float t, customer curr_customer)
+void station::add_customer_to_station(float t, customer curr_customer, bool keep_virtual = false, event_type_list arrival_processes = { [](float t)-> float{return 0;} },std::vector<float> ta = {0.0})
 {
-    ++n;
-    std::vector<int> empty_servers;
-
-    for (int i = 0; i < mxN; i++) // O(mxN)
-        if (server_status[i] == 0)
-            empty_servers.push_back(i);
-
-    counter_variable.push_back(std::make_tuple(curr_customer, t, n, current_queue.size(), 0, 0));
-
-    if (empty_servers.size())
+    
+    float virtual_wait_time = -1;
+    // Generate virtual Waiting time by running a copy of the simulation
+    if(keep_virtual)
     {
-        assert(current_queue.size()==0);
-        server_status[empty_servers[0]] = 1;
-        td[empty_servers[0]] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
-        current_customer[empty_servers[0]] = curr_customer;
+        station virtual_wait( *this );
+        int t_ = t;
+        int arriving_customer = curr_customer[1];
 
-        std::get<4>(counter_variable[counter_variable.size() - 1]) = t;
+        virtual_wait.add_customer_to_station(t_,curr_customer,false);
+        arriving_customer++;
+        ta[curr_customer[0]] = t_ + arrival_processes[curr_customer[0]](t_) ;
+
+        customer dept_cust;
+
+        int priority;
+        
+        while (true)
+        {
+            t_ = std::min( virtual_wait.find_min_td(),  *std::min_element(ta.begin(),ta.end()) );
+
+            virtual_wait.server_updates(t_);
+
+            if (t_ == *std::min_element(ta.begin(),ta.end()))
+            {
+                //arrival happening
+                priority = std::distance(ta.begin(), std::min_element(ta.begin(),ta.end()) );
+                virtual_wait.add_customer_to_station(t_, {priority,arriving_customer},false);
+                arriving_customer++;
+                ta[priority] = t_ + arrival_processes[priority](t_) ;
+            }
+            else
+                dept_cust = virtual_wait.departure_updates(t_);
+            
+            if(dept_cust == curr_customer)
+                break;
+        }
+        virtual_wait_time = t_ - t;
+    }
+    // Comparision of patience times and decide whether to add customer
+    float patience_time = PatienceTimes[curr_customer[0]](t);
+    
+    bool add = (patience_time>virtual_wait_time);
+
+    if(add)
+    {
+        ++n;
+        std::vector<int> empty_servers;
+
+        for (int i = 0; i < mxN; i++) // O(mxN)
+            if (server_status[i] == 0)
+                empty_servers.push_back(i);
+
+        counter_variable.push_back(std::make_tuple(curr_customer, t, n, current_queue.size(), 0, 0));
+
+        if (empty_servers.size())
+        {
+            assert(current_queue.size()==0);
+            server_status[empty_servers[0]] = 1;
+            td[empty_servers[0]] = t + DepartureTimes[curr_customer[0]]((t - int(t)) + int(t) % 1440);
+            current_customer[empty_servers[0]] = curr_customer;
+
+            std::get<4>(counter_variable[counter_variable.size() - 1]) = t;
+        }
+        else
+            current_queue.insert(curr_customer);
+        ++Na;
     }
     else
-        current_queue.insert(curr_customer);
-    ++Na;
+    {
+        counter_variable.push_back(std::make_tuple(curr_customer, t, n, current_queue.size(), -1, -1));
+    }
+    
 }
 
 /// @brief Gives back the station::counter_variable.
@@ -352,7 +407,7 @@ customer station::departure_updates(float t)
         current_queue.erase(current_queue.begin()) ;
         server_status[k] = 1;
 
-        td[k] = t + DepartureTimes((t - int(t)) + int(t) % 1440);
+        td[k] = t + DepartureTimes[current_customer[k][0]]((t - int(t)) + int(t) % 1440);
 
         // insert service time in counter variable
         for(int i=counter_variable.size()-1;i>=0;i--)
@@ -502,7 +557,7 @@ void station::logger(std::string station_id, float t)
     std::ofstream logi;
     if (t == 0)
     {
-        logi.open("./logs/log_" + station_id + ".txt", std::ofstream::out|std::ofstream::trunc);
+        logi.open("./logs/log_" + station_id + ".txt", std::ofstream::out);
     }
     else
         logi.open("./logs/log_" + station_id + ".txt", std::ios_base::app);
@@ -563,7 +618,8 @@ void station::write_to_csv(std::string file_name)
     for (auto &x : counter_variable)
     {
         if(std::get<5>(x) == 0)
-            break;
+            continue;
+        data << std::fixed << std::setprecision(precision);
         data << std::get<0>(x)[1] <<","
              << std::get<0>(x)[0] <<","
              << std::get<1>(x) << ","
@@ -627,9 +683,11 @@ void station::dump_counter_variable_memory(std::string file_name)
     for (auto &x : counter_variable)
     {
         if(std::get<5>(x) == 0)
-            break;
+            continue;
+        data << std::fixed << std::setprecision(precision);
         data << std::get<0>(x)[1] <<","
              << std::get<0>(x)[0] <<","
+             << std::get<1>(x) << ","
              << std::get<2>(x) << ","
              << std::get<3>(x) << ","
              << ((int(std::get<1>(x))) % 1440) / 10 << ','
@@ -708,4 +766,17 @@ std::vector<float> read_csv(std::string filename,int index = 1)
     }
     fin.close();
     return data;
+}
+
+/// @brief Computes the vector of functions of event types.
+/// @param fncs The vector of functions which is to be copmuted. f: float -> float
+/// @return A vector of float
+std::vector<float> call_event_type_list(event_type_list fncs)
+{
+    std::vector<float> temp;
+    for(auto x:fncs)
+    {
+        temp.push_back(x(0));
+    }
+    return temp;
 }

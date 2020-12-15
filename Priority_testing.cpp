@@ -68,43 +68,43 @@ float exponentialrv(float lambda)
     return -log(U)/lambda;
 }
 
-float priority_gen(int N)
-{
-    float U = random;
-    return int(N*U);
-}
 
-void simulate_station(station temp)
+void simulate_station(station temp,event_type_list arrival_processes)
 {
-    // 0 ,1 , 2, ... , N-1
-    // temp.print_station_status(0);
     int discrete_events = 0;
     int arriving_customer = 0;
     float t = 0;
-    float ta = exponentialrv(0.12);
-    int priority = priority_gen(temp.num_classes());
-    while (discrete_events < 500)
+    // std::vector<float> ta = std::for_each(arrival_processes.begin(),arrival_processes.end(), event_type::operator() );
+    std::vector<float> ta = call_event_type_list(arrival_processes);
+    int priority;
+    temp.initialize_CSV("./output/dataMM1");
+    while (discrete_events < 1000000)
     {
-        t = std::min(temp.find_min_td(), ta);
+        t = std::min( temp.find_min_td(),  *std::min_element(ta.begin(),ta.end()) );
         temp.server_updates(t);
-        if (t == ta)
+        if (t == *std::min_element(ta.begin(),ta.end()))
         {
             //arrival happening
-            priority = priority_gen(temp.num_classes());
-            temp.add_customer_to_station(t, {priority,arriving_customer});
+            priority = std::distance(ta.begin(), std::min_element(ta.begin(),ta.end()) );
+            temp.add_customer_to_station(t, {priority,arriving_customer},true,arrival_processes,ta);
             arriving_customer++;
-            ta = t + exponentialrv(0.12);
+            ta[priority] = t + arrival_processes[priority](t) ;
         }
         else
             temp.departure_updates(t);
         // temp.print_station_status(t);
+        if(discrete_events%100000==0)
+        {
+            std::cout<<"Writing to CSV\n";
+            temp.dump_counter_variable_memory("./output/dataMM1");
+        }
         discrete_events++;
-        temp.logger("lognormal",t);
+        // temp.logger("MM1",t);
     }
-    temp.write_to_csv("./output/dataMG1");
+    // temp.write_to_csv("./output/dataMM1");
 }
 
-void simulate_stations(std::vector<station> station_list)
+void simulate_stations(std::vector<station> station_list,event_type_list arrival_processes)
 {
     tandem temp (station_list);
 
@@ -116,46 +116,47 @@ void simulate_stations(std::vector<station> station_list)
     int discrete_events = 0;
     float t = 0;
     int arriving_customer = 0;
-    int priority = priority_gen(temp.num_classes());
-    float ta = Ts_generator(t);
+    int priority;
+    std::vector<float> ta = call_event_type_list(arrival_processes);
 
-    // temp.print_system_status(T(t));
-    temp.logger(t);
+    // temp.logger(t);
+    temp.initialize_CSV("./output/tandem");
 
-    while(discrete_events<500)
+    while(discrete_events<1000000)
     {
         std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();
-
-        // std::cout << "Least dep time :" <<least_dep_time <<",Station_index : "<<least_station_index<<endl;
-
-        t = std::min(least_dep_time, ta);
+        // temp.server_updates();
+        t = std::min(least_dep_time, *std::min_element(ta.begin(),ta.end()) );
 
         temp.server_updates(t);
 
-        if(t == ta)
+        if(t == *std::min_element(ta.begin(),ta.end()) )
         {
-            // std::cout << "---------------------------------> Arrival at Station 0" << endl;
-            // update first station for arrival (index =0 station)
-            priority = priority_gen(temp.num_classes());
+            priority = std::distance(ta.begin(), std::min_element(ta.begin(),ta.end()) );
             temp.add_customer_to_system(t,{priority,arriving_customer});
             arriving_customer++;
-            ta = Ts_generator(t);
-            // std::cout << "Next arrival time :" << ta << endl;
+            ta[priority] = t + arrival_processes[priority](t) ;
         }
         else
             temp.departure_updates(least_station_index,t);
 
+        if(discrete_events%100000==0)
+        {
+            std::cout<<"Writing to CSV\n";
+            temp.dump_counter_variable_memory("./output/tandem");
+        }
+
         // temp.print_tandemstatus(T(t));
-        temp.logger(t);
+        // temp.logger(t);
         discrete_events++;
-        std::cout<<discrete_events<<endl;
+        // std::cout<<discrete_events<<endl;
     }
-    std::cout<<"Writing to CSV";
-    temp.write_to_csv("./output/tandem");
+    // std::cout<<"Writing to CSV";
+    // temp.write_to_csv("./output/tandem");
 }
 
 
-void simulate_graph(graph station_graph)
+void simulate_graph(graph station_graph,event_type_list arrival_processes)
 {
     float least_dep_time = 0;
     int least_station_index = 0;
@@ -165,39 +166,47 @@ void simulate_graph(graph station_graph)
     int discrete_events = 0;
     float t = 0;
     int arriving_customer = 0;
-    float ta = Ts_generator(t);
-    int priority = priority_gen(station_graph.num_classes());
+    int priority;
+    std::vector<float> ta = call_event_type_list(arrival_processes);
+
     // temp.print_system_status(T(t));
     // temp.logger(t);
+    station_graph.initialize_CSV("./output/graph");
 
-    while(discrete_events<500)
+    while(discrete_events<1000000)
     {
         std::tie(least_station_index, least_dep_time) = station_graph.find_least_dep_time();
-
-        t = std::min(least_dep_time, ta);
+        // station_graph.server_updates();
+        t = std::min(least_dep_time, *std::min_element(ta.begin(),ta.end()) );
 
         station_graph.server_updates(t);
 
-        if(t == ta)
+        if(t ==  *std::min_element(ta.begin(),ta.end()) )
         {
-            priority = priority_gen(station_graph.num_classes());
+            priority = std::distance(ta.begin(), std::min_element(ta.begin(),ta.end()) );
             station_graph.add_customer_to_graph(t,{priority,arriving_customer});
             arriving_customer++;
-            ta = Ts_generator(t);
+            ta[priority] = t + arrival_processes[priority](t) ;
         }
         else
             station_graph.departure_updates(least_station_index,t);
         
-        station_graph.logger(t);
+        // station_graph.logger(t);
+        if(discrete_events%100000==0)
+        {
+            std::cout<<"Writing to CSV\n";
+            station_graph.dump_counter_variable_memory("./output/graph");
+        }
         discrete_events++;
-        std::cout<<discrete_events<<endl;
+        // std::cout<<discrete_events<<endl;
     }
-    std::cout<<"Writing to CSV";
-    station_graph.write_to_csv("./output/graph");
+    // std::cout<<"Writing to CSV\n";
+    // station_graph.write_to_csv("./output/graph");
 }
 
-int main()
+signed main()
 {   
+    std::cout << std::fixed << std::setprecision(precision);
     srand((unsigned)time(NULL));
     // simulate_station(station(5,5,DepartureTimes,20, std::bind(priority_gen,20) ) );
     // auto c0 = std::bind(priority_gen,2);
@@ -209,73 +218,88 @@ int main()
     std::vector<station> station_list;
 
     // 0
-    station_list.push_back(station(1,1, 
-    [lognormal_values_12_2](float t)-> float 
-    { 
-        float U = random; 
-        int index = (int)(U*lognormal_values_12_2.size());
-        try
-        {
-            return lognormal_values_12_2[index];
-        }
-        catch(const std::exception& e)
-        {
-            return lognormal_values_12_2[index-1];
-        }
-    },4
-    ));
-
+    station_list.push_back(
+        station(1,1,{
+            // 0
+            [lognormal_values_12_2](float t)-> float 
+            { 
+                float U = random; 
+                int index = (int)(U*lognormal_values_12_2.size());
+                try
+                {
+                    return lognormal_values_12_2[index];
+                }
+                catch(const std::exception& e)
+                {
+                    return lognormal_values_12_2[index-1];
+                }
+            },
+            // 2
+            [lognormal_values_5_2](float t)-> float 
+            { 
+                float U = random; 
+                int index = (int)(U*lognormal_values_5_2.size());
+                try
+                {
+                    return lognormal_values_5_2[index];
+                }
+                catch(const std::exception& e)
+                {
+                    return lognormal_values_5_2[index-1];
+                }
+            }
+        },2)
+    );
+    
     //1
-    station_list.push_back(station(1,1,
-    [lognormal_values_12_2](float t)-> float 
-    { 
-        float U = random; 
-        int index = (int)(U*lognormal_values_12_2.size());
-        try
-        {
-            return lognormal_values_12_2[index];
-        }
-        catch(const std::exception& e)
-        {
-            return lognormal_values_12_2[index-1];
-        }
-    },4
-    ));
+    station_list.push_back(
+        station(2,2,{
+            // 0
+            [](float t)-> float { return exponentialrv(0.14); },
+            // 1
+            [](float t)-> float { return exponentialrv(0.13); }
+        },2)
+    );
 
     //2 
-    station_list.push_back(station(1,1,
-    [lognormal_values_12_2](float t)-> float 
-    { 
-        float U = random; 
-        int index = (int)(U*lognormal_values_12_2.size());
-        try
-        {
-            return lognormal_values_12_2[index];
-        }
-        catch(const std::exception& e)
-        {
-            return lognormal_values_12_2[index-1];
-        }
-    },4));
+    station_list.push_back(
+        station(1,1,{
+            //0
+            [lognormal_values_5_2](float t)-> float 
+            { 
+                float U = random; 
+                int index = (int)(U*lognormal_values_5_2.size());
+                try
+                {
+                    return lognormal_values_5_2[index];
+                }
+                catch(const std::exception& e)
+                {
+                    return lognormal_values_5_2[index-1];
+                }
+            },
+            //1
+            [lognormal_values_12_2](float t)-> float 
+            { 
+                float U = random; 
+                int index = (int)(U*lognormal_values_12_2.size());
+                try
+                {
+                    return lognormal_values_12_2[index];
+                }
+                catch(const std::exception& e)
+                {
+                    return lognormal_values_12_2[index-1];
+                }
+            }
+        },2)
+    );
 
     //3
-    station_list.push_back(station(5,5,DepartureTimes,4));
+    station_list.push_back(station(5,5,10,2));
 
     //4
-    station_list.push_back(station(4,4,
-        [lognormal_values_5_2](float t)-> float 
-        { 
-            float U = random; 
-            int index = (int)(U*lognormal_values_5_2.size());
-            try
-            {
-                return lognormal_values_5_2[index];
-            }
-            catch(const std::exception& e)
-            {
-                return lognormal_values_5_2[index-1];
-            }
-        },4));
+    station_list.push_back(station(4,4,5,2));
 
     std::vector< std::vector< std::pair<int,int> > > network = {
         {{1,1}},
@@ -284,9 +308,53 @@ int main()
         {{4,1}},
         {}
     };
-    // station_list.push_back(temp2);
+
+    // simulate_station(
+    //     station(1,1,
+    //         event_type_list({
+    //             // 0
+    //             [](float t)-> float
+    //             {
+    //                 return exponentialrv(0.14);
+    //             },
+    //             // 1
+    //             [](float t)-> float
+    //             {
+    //                 return exponentialrv(0.13);
+    //             },
+    //             // 2
+    //             [](float t)-> float
+    //             {
+    //                 return exponentialrv(0.20);
+    //             }
+    //         })
+    //     ,3)
+    // ,
+    // //Arrival processes
+    //     {
+    //         // 0
+    //         [](float t)-> float { exponentialrv(1.2/1000); },
+    //         // 1
+    //         [](float t)-> float { exponentialrv(1.1/100); },
+    //         // 2
+    //         [](float t)-> float { exponentialrv(0.9/10); },
+    //     }
+    // );
+
+    // simulate_stations(station_list,{
+    //     //0
+    //     [](float t)-> float { exponentialrv(0.0012); },
+    //     [](float t)-> float { exponentialrv(0.011); }
+    // });
+
     graph station_graph(0,0,network,station_list);
-    simulate_graph(station_graph);
+    
+    simulate_graph(station_graph,{
+        //0
+        [](float t)-> float { exponentialrv(0.0012); },
+        [](float t)-> float { exponentialrv(0.011); }
+    });
+
 
     return 0 ;
 }

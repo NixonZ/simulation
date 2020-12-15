@@ -126,21 +126,10 @@ void graph::write_to_csv(std::string file_name = "data_system")
     // }
     data <<"Time of start of service,Departure time,Wait time,\n";
 
-    customer last_customer_in_last_station = {0,0};
-
-    for (int i = station_list[station_list.size() - 1].get_counter_variable().size()-1;i>=0;i++)
-    {
-        if (std::get<5>(station_list[station_list.size() - 1].get_counter_variable()[i]) > 0 )
-        {
-            last_customer_in_last_station = std::get<0>(station_list[station_list.size() - 1].get_counter_variable()[i]);
-            break;
-        }
-    }
-
     for (auto &x : system_counter_variable)
     {
         if(std::get<4>(x) == 0)
-            break;
+            continue;
         data << std::get<0>(x)[1] <<","
              << std::get<0>(x)[0] <<","
              << std::get<1>(x) <<","
@@ -160,9 +149,72 @@ void graph::write_to_csv(std::string file_name = "data_system")
              << std::get<4>(x) << ","
              << (std::get<3>(x) - std::get<1>(x)) << ","
              << "\n";
-        if (std::get<0>(x) == last_customer_in_last_station)
-            break;
     }
+    data.close();
+}
+
+void graph::initialize_CSV(std::string tandem_name = "data_system")
+{
+    std::ofstream data;
+
+    data.open( tandem_name + ".csv", std::ofstream::out|std::ofstream::trunc);
+    data << "Customer ID,Priority Level,Time of arrival,Number of people at arrival,Which 10 min interval in day,Which day in week,";
+    // for(int i=0;i<this->station_list.size();i++)
+    // {
+    //     data << "Number of people at station " <<i <<" at arrival,";
+    //     data << "Number of people in queue at station " <<i <<" at arrival,";
+    //     data << "Number of active servers in station " <<i <<',';
+    // }
+    data <<"Time of start of service,Departure time,Wait time,\n";
+    data.close();
+}
+
+void graph::dump_counter_variable_memory(std::string tandem_name = "data_system")
+{
+    std::ofstream data;
+
+    data.open( tandem_name + ".csv", std::ofstream::app);
+    
+    for (auto &x : system_counter_variable)
+    {
+        if(std::get<4>(x) == 0)
+            continue;
+        data << std::get<0>(x)[1] <<","
+             << std::get<0>(x)[0] <<","
+             << std::get<1>(x) <<","
+             << std::get<2>(x) << ","
+             << ((int(std::get<1>(x))) % 1440) / 10 << ','
+             << int(std::get<1>(x) / 1440) % 7 << ',';
+
+        // for(auto &station_info:std::get<3>(x))
+        // {
+        //     data << std::get<0>(station_info) <<',';
+        //     data << std::get<1>(station_info) <<',';
+        //     data << std::get<2>(station_info) <<',';
+        // }
+
+
+        data << std::get<3>(x) << ","
+             << std::get<4>(x) << ","
+             << (std::get<3>(x) - std::get<1>(x)) << ","
+             << "\n";
+    }
+    
+    std::vector<graph_data> system_counter_variable_temp;
+    system_counter_variable_temp.assign(0,{});
+    for(int i = 0;i<this->system_counter_variable.size();i++)
+    {
+        if(std::get<4>(this->system_counter_variable[i])==0)
+            system_counter_variable_temp.push_back(this->system_counter_variable[i]);
+    }
+    this->system_counter_variable.clear();
+    this->system_counter_variable = system_counter_variable_temp;
+
+    for(int i =0 ;i<this->station_list.size();i++)
+    {
+        station_list[i].dump_counter_variable_memory();
+    }
+
     data.close();
 }
 
