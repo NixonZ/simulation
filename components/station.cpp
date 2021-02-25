@@ -240,7 +240,7 @@ void station::server_updates(float t)
 ///         discrete_events++;
 ///     }
 ///  @endcode
-void station::add_customer_to_station(float t, customer curr_customer, bool keep_virtual = false, event_type_list arrival_processes = { [](float t)-> float{return 0;} },std::vector<float> ta = {0.0})
+void station::add_customer_to_station(float t, customer curr_customer, bool keep_virtual, event_type_list arrival_processes, std::vector<float> ta)
 {
     
     float virtual_wait_time = -1;
@@ -756,7 +756,13 @@ std::vector<float> read_csv(std::string filename,int index = 1)
         } 
         try
         {
-            data.push_back( std::stof(row[index]) );
+            if (std::stof(row[index])<0)
+            {
+                fin.close();
+                return data;
+            }
+            else
+                data.push_back( std::stof(row[index]) );
         }
         catch(const std::exception& e)
         {

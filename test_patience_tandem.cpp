@@ -25,7 +25,7 @@ void simulate_stations(tandem temp,event_type_list arrival_processes)
     // temp.logger(t);
     temp.initialize_CSV("./output/tandem");
 
-    while(discrete_events<1000000)
+    while(discrete_events<100000)
     {
         std::tie(least_station_index, least_dep_time) = temp.find_least_dep_time();
         // temp.server_updates();
@@ -43,13 +43,15 @@ void simulate_stations(tandem temp,event_type_list arrival_processes)
         else
             temp.departure_updates(least_station_index,t);
 
-        if(discrete_events%100000==0)
+        if(discrete_events%10000==0 && discrete_events >0)
         {
+            std::cout<<discrete_events <<'\n';
             std::cout<<"Writing to CSV\n";
             temp.dump_counter_variable_memory("./output/tandem");
         }
 
         // temp.print_tandemstatus(T(t));
+        // temp.logger(t);
         // temp.logger(t);
         discrete_events++;
         // std::cout<<discrete_events<<endl;

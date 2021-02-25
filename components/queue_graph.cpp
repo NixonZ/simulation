@@ -1,9 +1,22 @@
 #include "queue_graph.h"
 
-graph::graph(int init_N,int init_max_queue_len, std::vector<std::vector<std::pair<int, int>>> init_network, std::vector<station> temp)
+graph::graph(int init_N,int init_max_queue_len, std::vector<std::vector<std::pair<int, float>>> init_network, std::vector<station> temp)
 {
     N = init_N;
     max_queue_len = init_max_queue_len;
+    bool check_network = true;
+    float sum = 0;
+    for (size_t i = 0; i < init_network.size(); i++)
+    {
+        sum = 0;
+        for(auto& x:init_network[i])
+        {
+            sum += x.second;
+        }
+        if(sum!=1.00 && !init_network[i].empty())
+            check_network = false;
+    }
+    assert(check_network == true);
     network = init_network;
     station_list = temp;
     num_nodes = station_list.size();
@@ -106,9 +119,21 @@ void graph::departure_updates(int station_index, float t)
         // do departure updates for station_index
         // arrival updates for one the connected stations.
     
-        int num_of_connected_nodes = (int)network[station_index].size();
+        // int num_of_connected_nodes = (int)network[station_index].size();
         float U = random;
-        station_list[std::get<0>(network[station_index][int(num_of_connected_nodes*U)])].add_customer_to_station(t,departing_customer);
+        float sum = 0;
+        // Sample from the all the connected nodes (Discrete pdf)
+        for(auto& x: network[station_index])
+        {
+            sum += std::get<1>(x); //cdf 
+            if(U<sum)
+            {
+                station_list[std::get<0>(x)].add_customer_to_station(t,departing_customer);
+                break;
+            }
+        }
+        if(U==1)
+            station_list[std::get<0>((*--network[station_index].end()))].add_customer_to_station(t,departing_customer);
     }
 }
 

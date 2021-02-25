@@ -7,7 +7,7 @@ class tandem
     int number_of_station;
     std::vector<tandem_data> system_counter_variable;
     event_type_list PatienceTimes;
-    int num_classes;
+    int num_class;
     /* 
     0 - Customer
     1 - Time of arrival
@@ -20,7 +20,7 @@ class tandem
 
 public:
     tandem(std::vector<station> temp, event_type_list PatienceTimes_para = event_type_list( 1 , [](float t) -> float { return (0.0); }  ),int num_classes_para = 0)
-    : PatienceTimes(PatienceTimes_para),num_classes(num_classes_para)
+    : PatienceTimes(PatienceTimes_para),num_class(num_classes_para)
     {
         station_list = temp;
         number_of_station = temp.size();
@@ -31,11 +31,11 @@ public:
         this->station_list = copy.station_list;
         this->number_of_station = copy.number_of_station;
         this->PatienceTimes = copy.PatienceTimes;
-        this-> num_classes = copy.num_classes;
+        this-> num_class = copy.num_class;
     }
     std::tuple<int, float> find_least_dep_time();
     void print_system_status(float t);
-    void add_customer_to_system(float t,customer curr_customer,bool keep_virtual, event_type_list arrival_processes,std::vector<float> ta);
+    void add_customer_to_system(float t,customer curr_customer,bool keep_virtual = false, event_type_list arrival_processes = { [](float t)-> float{return 0;} },std::vector<float> ta= {0.0});
     customer departure_updates(int station_index, float t);
     void server_updates(float t);
     void write_to_csv(std::string tandem_name);

@@ -1,6 +1,6 @@
 #include "tandem.h"
 
-void tandem::add_customer_to_system(float t, customer curr_customer, bool keep_virtual = false, event_type_list arrival_processes = { [](float t)-> float{return 0;} },std::vector<float> ta = {0.0})
+void tandem::add_customer_to_system(float t, customer curr_customer, bool keep_virtual, event_type_list arrival_processes ,std::vector<float> ta)
 {
     N++;
 
@@ -129,7 +129,7 @@ customer tandem::departure_updates(int station_index, float t)
     {
         // std::cout << "---------------------------------> Departure at station :" << station_index << endl;
         station_list[station_index + 1].add_customer_to_station(t, station_list[station_index].departure_updates(t));
-        return;
+        return {1,1};
         // do departure updates for station_index
         // do arrival updates for station_index+1
     }
@@ -219,6 +219,7 @@ void tandem::initialize_CSV(std::string tandem_name = "data_system")
 
 void tandem::dump_counter_variable_memory(std::string tandem_name = "data_system")
 {
+    
     std::ofstream data;
 
     data.open( tandem_name + ".csv", std::ofstream::app);

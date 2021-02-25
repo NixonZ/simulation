@@ -17,7 +17,7 @@ void simulate_station(station temp,event_type_list arrival_processes)
     std::vector<float> ta = call_event_type_list(arrival_processes);
     int priority;
     // temp.initialize_CSV("./output/dataMM1_patience");
-    while (arriving_customer < 10)
+    while (discrete_events < 100000)
     {
         t = std::min( temp.find_min_td(),  *std::min_element(ta.begin(),ta.end()) );
         temp.server_updates(t);
@@ -33,15 +33,15 @@ void simulate_station(station temp,event_type_list arrival_processes)
             temp.departure_updates(t);
         // temp.print_station_status(t);
 
-        // if(arriving_customer%10000==0)
-        // {
-        //     // std::cout<<"Writing to CSV\n";
-        //     std::cout<<discrete_events <<endl;
-        //     temp.dump_counter_variable_memory("./output/dataMM1_patience");
-        // }
+        if(discrete_events%10000==0)
+        {
+            // std::cout<<"Writing to CSV\n";
+            std::cout<<discrete_events <<endl;
+            temp.dump_counter_variable_memory("./output/dataMM1_patience");
+        }
 
         discrete_events++;
-        temp.logger("MM1",t);
+        // temp.logger("MM1",t);
     }
     // temp.write_to_csv("./output/dataMM1");
 }
