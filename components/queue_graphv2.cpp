@@ -1,6 +1,6 @@
 #include "queue_graphv2.h"
 
-graphv2::graphv2(int init_N,int init_max_queue_len, std::vector<std::vector<std::pair<int, float>>> init_network, std::vector<station> temp)
+graphv2::graphv2(int init_N,int init_max_queue_len, std::vector<std::vector<std::pair<int, float>>> init_network, std::vector<station> temp, event_type_list PatienceTimes)
 {
     N = init_N;
     max_queue_len = init_max_queue_len;
@@ -18,8 +18,9 @@ graphv2::graphv2(int init_N,int init_max_queue_len, std::vector<std::vector<std:
         {
             sum += x.second;
         }
-        if(sum!=1.00 && init_network[i].empty() == 0)
+        if(sum<0.999 && init_network[i].empty() == 0)
         {
+            std::cout<<"i:" <<i <<"sum" <<sum <<endl;
             check_network = false;
         }
     }
@@ -27,6 +28,7 @@ graphv2::graphv2(int init_N,int init_max_queue_len, std::vector<std::vector<std:
     network = init_network;
     station_list = temp;
     num_nodes = station_list.size();
+    this->PatienceTimes = PatienceTimes;
     // calculate_distance();
 }
 
@@ -73,6 +75,79 @@ void graphv2::add_customer_to_graph(float t,customer arriving_customer)
     system_counter_variable.push_back(std::make_tuple(arriving_customer, t, N, 0, 0));
 }
 
+void graphv2::add_customer_to_graph_vir(float t, customer curr_customer, bool keep_virtual, event_type_list arrival_processes, std::vector<float> ta)
+{
+    float virtual_wait_time = -1;
+    // Generate virtual Waiting time by running a copy of the simulation
+    float patience_time = PatienceTimes[curr_customer[0]](t);
+    bool add = true;
+    if(keep_virtual)
+    {
+        graphv2 virtual_wait( *this );
+        int t_ = t;
+        int arriving_customer = curr_customer[1];
+
+        virtual_wait.add_customer_to_graph_vir(t_,curr_customer,false);
+        arriving_customer++;
+        ta[curr_customer[0]] = t_ + arrival_processes[curr_customer[0]](t_) ;
+        float least_dep_time = 0;
+        int least_station_index = 0;
+        
+
+        customer dept_cust;
+
+        int priority;
+        
+        while (true)
+        {
+            std::tie(least_station_index, least_dep_time) = virtual_wait.find_least_dep_time();
+            t_ = std::min(least_dep_time, *std::min_element(ta.begin(),ta.end()) );
+            virtual_wait.server_updates(t_);
+
+            
+            if(t_ ==  *std::min_element(ta.begin(),ta.end()) )
+            {
+                priority = std::distance(ta.begin(), std::min_element(ta.begin(),ta.end()) );
+                virtual_wait.add_customer_to_graph_vir(t_,{priority,arriving_customer},false);
+                arriving_customer++;
+                ta[priority] = t_ + arrival_processes[priority](t_) ;
+            }
+            else
+            {
+                dept_cust = virtual_wait.departure_updates(least_station_index,t_);
+                if(dept_cust == curr_customer)
+                    break;
+
+            }
+            if( t_-t > patience_time )
+            {
+                //  more time has elapsed and customer has not departed yet
+                //thus virtual_wait_time > patience time
+                add = false;
+                break;
+            }
+            
+        }
+        virtual_wait_time = t_ - t;
+    }
+    // Comparision of patience times and decide whether to add customer
+    if(add)
+        add = (patience_time > virtual_wait_time);
+
+    if(add)
+    {
+        N++;
+        station_list[0].add_customer_to_station(t, curr_customer);
+        
+        system_counter_variable.push_back(std::make_tuple(curr_customer, t, N, 0, 0));
+        
+    }
+    else
+    {
+        system_counter_variable.push_back(std::make_tuple(curr_customer, t, N, -1, -1));
+    }
+}
+
 std::tuple<int, float> graphv2::find_least_dep_time()
 {
     int station_index = 0;
@@ -89,7 +164,7 @@ std::tuple<int, float> graphv2::find_least_dep_time()
     return std::make_tuple(station_index, least_dep_time);
 }
 
-void graphv2::departure_updates(int station_index, float t)
+customer graphv2::departure_updates(int station_index, float t)
 {
     if (std::find(exit_stations.begin(), exit_stations.end(), station_index) != exit_stations.end()) // can be binary searched
     {
@@ -119,6 +194,7 @@ void graphv2::departure_updates(int station_index, float t)
             }
         }
         // do only departure updates for last station
+        return departing_customer;
     }
     else
     {
@@ -142,6 +218,7 @@ void graphv2::departure_updates(int station_index, float t)
         if(U==1)
             station_list[std::get<0>((*--network[station_index].end()))].add_customer_to_station(t,departing_customer);
     }
+    return {1,1};
 }
 
 void graphv2::write_to_csv(std::string file_name = "data_system")
@@ -228,7 +305,7 @@ void graphv2::dump_counter_variable_memory(std::string tandem_name = "data_syste
 
         data << std::get<3>(x) << ","
              << std::get<4>(x) << ","
-             << (std::get<3>(x) - std::get<1>(x)) << ","
+             << ( ( std::get<4>(x) == -1 )?-1:(std::get<4>(x) - std::get<1>(x)) ) << ","
              << "\n";
     }
     

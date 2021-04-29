@@ -57,7 +57,7 @@ float station::find_min_td()
 ///  
 void station::server_updates(float t)
 {
-    int c_ = C(T(t));
+    int c_ = C(TimeReset(t));
     if (c_ > this->c)
     // Server Adding
     {
@@ -651,7 +651,7 @@ void station::reset_queue(float t)
     td.clear();
     td.assign(mxN, INF);
     counter_variable.clear();
-    this->server_updates(T(t));
+    this->server_updates(TimeReset(t));
 }
 
 /// @brief Gives the minimum residual time i.e. time left for next departure.
@@ -664,7 +664,7 @@ float station::minimum_residual_time(float t)
 
 std::tuple<int,int,int> station::access_system_state(float t)
 {
-    return std::make_tuple(  n, current_queue.size(), C(T(t)) );
+    return std::make_tuple(  n, current_queue.size(), C(TimeReset(t)) );
 }
 
 void station::initialize_CSV(std::string file_name)
@@ -756,7 +756,7 @@ std::vector<float> read_csv(std::string filename,int index = 1)
         } 
         try
         {
-            if (std::stof(row[index])<0)
+            if (std::stof(row[index])<-1)
             {
                 fin.close();
                 return data;

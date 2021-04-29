@@ -2,6 +2,7 @@
 #include "components/station.h"
 #include "components/tandem.h"
 #include "components/queue_graph.h"
+#include "components/queue_graphv2.h"
 
 float lambda(float t)
 {
@@ -347,7 +348,13 @@ signed main()
     //     [](float t)-> float { exponentialrv(0.011); }
     // });
 
-    graph station_graph(0,0,network,station_list);
+    graph station_graph(0,0,network,station_list,
+    {
+        [](float t) -> float{ return 5;},
+        //1
+        [](float t) -> float{ return 5;}
+    }
+    );
     
     simulate_graph(station_graph,{
         //0

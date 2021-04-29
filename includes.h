@@ -22,7 +22,7 @@
 #define precision 7
 #define INF 3 * std::numeric_limits<float>::max()
 #define endl "\n"
-#define T(t) (t - int(t)) + int(t) % 1440
+#define TimeReset(t) (t - int(t)) + int(t) % 1440
 #define random (float)rand() / RAND_MAX;
 #define rnd  distribution(generator)
 #define customer std::array<int,2> /*!< Customer data type 0 - Priority, 1- Customer ID*/

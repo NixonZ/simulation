@@ -2,7 +2,6 @@
 
 void tandem::add_customer_to_system(float t, customer curr_customer, bool keep_virtual, event_type_list arrival_processes ,std::vector<float> ta)
 {
-    N++;
 
     float virtual_wait_time = -1;
     // Generate virtual Waiting time by running a copy of the simulation
@@ -39,12 +38,12 @@ void tandem::add_customer_to_system(float t, customer curr_customer, bool keep_v
             }
             else if(least_station_index == number_of_station-1)
             {
-                dept_cust = virtual_wait.departure_updates(least_station_index,t);
+                dept_cust = virtual_wait.departure_updates(least_station_index,t_);
                 if(dept_cust == curr_customer)
                     break;
             }
             else
-                virtual_wait.departure_updates(least_station_index,t);
+                virtual_wait.departure_updates(least_station_index,t_);
         }
         virtual_wait_time = t_ - t;
     }
@@ -61,6 +60,7 @@ void tandem::add_customer_to_system(float t, customer curr_customer, bool keep_v
 
     if(add)
     {
+        N++;
         station_list[0].add_customer_to_station(t, curr_customer,false);
         system_counter_variable.push_back(
             std::make_tuple(curr_customer, t, N,temp, 0, 0)
